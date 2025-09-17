@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pametra Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-card: #2a2a2a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --text-muted: #808080;
+            --accent-green: #22c55e;
+            --accent-green-hover: #16a34a;
+            --accent-red: #ef4444;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-green);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .client-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 24px;
+        }
+
+        .client-dropdown {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav-container {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 24px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-tab {
+            padding: 16px 0;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .nav-tab.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent-green);
+        }
+
+        .nav-icon {
+            font-size: 16px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 32px;
+            color: var(--text-primary);
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-icon {
+            font-size: 18px;
+            color: var(--accent-green);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        .empty-subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 32px;
+        }
+
+        .stats-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stats-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .stats-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .view-calendar-link {
+            color: var(--accent-green);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .view-calendar-link:hover {
+            color: var(--accent-green-hover);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .stat-item {
+            text-align: left;
+        }
+
+        .stat-icon {
+            width: 20px;
+            height: 20px;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Claims Table */
+        .claims-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .claims-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .claims-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .claims-table {
+            width: 100%;
+        }
+
+        .claims-table th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .claims-table td {
+            padding: 16px 24px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .claims-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Utilities */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-green {
+            color: var(--accent-green);
+        }
+
+        .text-red {
+            color: var(--accent-red);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <div class="logo">📦</div>
+            <span class="brand-name">Pametra Dashboard</span>
+            
+            <div class="client-selector">
+                <span class="text-green">📊</span>
+                <div class="client-dropdown">
+                    <span>Select Client</span>
+                    <span>▼</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="user-section">
+            <div class="user-info">
+                <div class="user-avatar">👤</div>
+                <span>Eddy Lu</span>
+                <span>↗</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="nav-container">
+        <div class="nav-tabs">
+            <a href="#" class="nav-tab active">
+                <span class="nav-icon">📊</span>
+                Overview
+            </a>
+            <a href="#" class="nav-tab">
+                <span class="nav-icon">👥</span>
+                Client Management
+            </a>
+            <a href="#" class="nav-tab">
+                <span class="nav-icon">⚙️</span>
+                Settings
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <h1 class="page-title">Dashboard Overview</h1>
+        
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <!-- Employee Filing Activity -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        Employee Filing Activity
+                    </h2>
+                    <span class="card-icon text-green">📈</span>
+                </div>
+                
+                <div class="empty-state">
+                    <div class="empty-icon">📈</div>
+                    <div class="empty-title">No filing activity today</div>
+                    <div class="empty-subtitle">Activity will appear here as claims are filed</div>
+                </div>
+            </div>
+            
+            <!-- Upcoming Client Meetings -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        Upcoming Client Meetings
+                    </h2>
+                    <span class="card-icon text-red">📅</span>
+                </div>
+                
+                <div class="empty-state">
+                    <div class="empty-icon">📅</div>
+                    <div class="empty-title">No upcoming meetings scheduled</div>
+                    <div class="empty-subtitle">Schedule meetings with your clients</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div class="stats-section">
+            <div class="stats-header">
+                <div>
+                    <div class="stats-title">Total Today</div>
+                    <div class="stats-value">0 Claims</div>
+                </div>
+                <a href="#" class="view-calendar-link">View full calendar →</a>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Total Claims</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Processing</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">Approved</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-value">$0</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value">0%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+                
+                <div class="stat-item">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-value">0hrs</div>
+                    <div class="stat-label">Avg Time</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Claims -->
+        <div class="claims-section">
+            <div class="claims-header">
+                <h2 class="claims-title">Recent Claims</h2>
+            </div>
+            
+            <table class="claims-table">
+                <thead>
+                    <tr>
+                        <th>Claim ID</th>
+                        <th>Client</th>
+                        <th>Carrier</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Empty table - no claims yet -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        // Simple tab switching functionality
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Remove active class from all tabs
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                tab.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

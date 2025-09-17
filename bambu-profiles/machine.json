@@ -1,0 +1,115 @@
+{
+  "type": "machine",
+  "setting_id": "BML00",
+  "name": "Bambu Lab X1 Carbon",
+  "from": "system",
+  "instantiation": "true",
+  "inherits": "Bambu Lab X1 Carbon",
+  "bed_mesh_max": [
+    256,
+    256
+  ],
+  "bed_mesh_min": [
+    0,
+    0
+  ],
+  "before_layer_change_gcode": "",
+  "change_filament_gcode": "",
+  "default_filament_profile": [
+    "Bambu PLA Basic @BBL X1C"
+  ],
+  "default_print_profile": "0.20mm Standard @BBL X1C",
+  "gcode_flavor": "marlin",
+  "head_parking_pos": [
+    258,
+    258
+  ],
+  "high_current_on_filament_swap": "0",
+  "layer_change_gcode": "",
+  "machine_end_gcode": "",
+  "machine_max_acceleration_e": "5000,5000",
+  "machine_max_acceleration_extruding": "5000,5000",
+  "machine_max_acceleration_retracting": "5000,5000",
+  "machine_max_acceleration_travel": "10000,10000",
+  "machine_max_acceleration_x": "10000,10000",
+  "machine_max_acceleration_y": "10000,10000",
+  "machine_max_acceleration_z": "200,200",
+  "machine_max_jerk_e": "10,10",
+  "machine_max_jerk_x": "15,15",
+  "machine_max_jerk_y": "15,15",
+  "machine_max_jerk_z": "5,5",
+  "machine_max_speed_e": "120,120",
+  "machine_max_speed_x": "500,500",
+  "machine_max_speed_y": "500,500",
+  "machine_max_speed_z": "30,30",
+  "machine_pause_gcode": "",
+  "machine_start_gcode": "",
+  "max_layer_height": [
+    0.4
+  ],
+  "min_layer_height": [
+    0.08
+  ],
+  "nozzle_diameter": [
+    0.4
+  ],
+  "nozzle_volume": "0",
+  "parking_pos_retraction": "92",
+  "printable_area": [
+    [
+      0,
+      0
+    ],
+    [
+      256,
+      0
+    ],
+    [
+      256,
+      256
+    ],
+    [
+      0,
+      256
+    ]
+  ],
+  "printable_height": "250",
+  "printer_model": "Bambu Lab X1 Carbon",
+  "printer_settings_id": "Bambu Lab X1 Carbon",
+  "printer_structure": "corexy",
+  "printer_technology": "FFF",
+  "printer_variant": "0.4",
+  "printhost_api_key": "",
+  "printhost_authorization_type": "key",
+  "printhost_cafile": "",
+  "printhost_password": "",
+  "printhost_port": "",
+  "printhost_ssl_ignore_revoke": "0",
+  "printhost_user": "",
+  "retraction_minimum_travel": [
+    2
+  ],
+  "retraction_speed": [
+    30
+  ],
+  "scan_first_layer": "0",
+  "silent_mode": "0",
+  "single_extruder_multi_material": "1",
+  "template_custom_gcode": "",
+  "thumbnails": [
+    256,
+    256
+  ],
+  "thumbnails_format": "PNG",
+  "time_cost": "0",
+  "upward_compatible_machine": "",
+  "use_firmware_retraction": "0",
+  "use_relative_e_distances": "1",
+  "wipe": [
+    1
+  ],
+  "wipe_distance": [
+    2
+  ],
+  "z_offset": "0"
+}
