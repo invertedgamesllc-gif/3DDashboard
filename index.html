@@ -720,87 +720,22 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem;">
                     <div class="card" style="padding: 24px;">
                         <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 1rem;">🧵 Material Usage</h3>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 13px;">PLA</span>
-                            <div style="flex: 1; margin: 0 12px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
-                                <div style="height: 100%; width: 68%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 3px;"></div>
-                            </div>
-                            <span style="font-size: 11px; color: var(--text-muted);">68%</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <span style="font-size: 13px;">PETG</span>
-                            <div style="flex: 1; margin: 0 12px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
-                                <div style="height: 100%; width: 18%; background: linear-gradient(90deg, #3b82f6, #2563eb); border-radius: 3px;"></div>
-                            </div>
-                            <span style="font-size: 11px; color: var(--text-muted);">18%</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 13px;">ABS</span>
-                            <div style="flex: 1; margin: 0 12px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
-                                <div style="height: 100%; width: 14%; background: linear-gradient(90deg, #f59e0b, #d97706); border-radius: 3px;"></div>
-                            </div>
-                            <span style="font-size: 11px; color: var(--text-muted);">14%</span>
+                        <div id="materialUsageChart">
+                            <p style="color: var(--text-muted); font-size: 12px; text-align: center;">Loading inventory data...</p>
                         </div>
                     </div>
 
                     <div class="card" style="padding: 24px;">
                         <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 1rem;">🎨 Popular Colors</h3>
-                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
-                            <div style="text-align: center;">
-                                <div style="width: 32px; height: 32px; background: #000000; border-radius: 50%; margin: 0 auto 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
-                                <div style="font-size: 10px; color: var(--text-muted);">Black</div>
-                                <div style="font-size: 9px; color: var(--text-secondary);">1.2kg</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="width: 32px; height: 32px; background: #ffffff; border-radius: 50%; margin: 0 auto 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
-                                <div style="font-size: 10px; color: var(--text-muted);">White</div>
-                                <div style="font-size: 9px; color: var(--text-secondary);">950g</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="width: 32px; height: 32px; background: #dc2626; border-radius: 50%; margin: 0 auto 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
-                                <div style="font-size: 10px; color: var(--text-muted);">Red</div>
-                                <div style="font-size: 9px; color: var(--text-secondary);">680g</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="width: 32px; height: 32px; background: #2563eb; border-radius: 50%; margin: 0 auto 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
-                                <div style="font-size: 10px; color: var(--text-muted);">Blue</div>
-                                <div style="font-size: 9px; color: var(--text-secondary);">520g</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="width: 32px; height: 32px; background: #16a34a; border-radius: 50%; margin: 0 auto 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
-                                <div style="font-size: 10px; color: var(--text-muted);">Green</div>
-                                <div style="font-size: 9px; color: var(--text-secondary);">340g</div>
-                            </div>
+                        <div id="popularColorsChart" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+                            <p style="color: var(--text-muted); font-size: 12px; text-align: center; grid-column: 1/-1;">Loading color data...</p>
                         </div>
                     </div>
 
                     <div class="card" style="padding: 24px;">
                         <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 1rem;">📊 Order Status</h3>
-                        <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
-                            <div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(#22c55e 0% 45%, #f59e0b 45% 75%, #ef4444 75% 85%, #6b7280 85% 100%); position: relative;">
-                                <div style="width: 40px; height: 40px; background: var(--bg-card); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
-                            </div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
-                                <span style="font-size: 12px;">Completed</span>
-                            </div>
-                            <span style="font-size: 12px; font-weight: 600;">45%</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <div style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></div>
-                                <span style="font-size: 12px;">In Progress</span>
-                            </div>
-                            <span style="font-size: 12px; font-weight: 600;">30%</span>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></div>
-                                <span style="font-size: 12px;">Pending</span>
-                            </div>
-                            <span style="font-size: 12px; font-weight: 600;">25%</span>
+                        <div id="orderStatusChart">
+                            <p style="color: var(--text-muted); font-size: 12px; text-align: center;">Loading order data...</p>
                         </div>
                     </div>
                 </div>
@@ -5583,10 +5518,166 @@ Generated by 3D Print Business Manager
                 // Update revenue chart with real data
                 updateRevenueChart(orders);
 
+                // Update business metrics charts with real data
+                updateMaterialUsageChart();
+                updatePopularColorsChart();
+                updateOrderStatusChart(orders);
+
             } catch (error) {
                 console.error('Error loading dashboard:', error);
             }
         };
+
+        // Update Material Usage Chart with real inventory data
+        function updateMaterialUsageChart() {
+            const container = document.getElementById('materialUsageChart');
+            if (!container) return;
+
+            const inventory = window.currentInventory || [];
+
+            if (inventory.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center;">No inventory data yet. Add materials in the Inventory tab.</p>';
+                return;
+            }
+
+            // Group by material type and sum quantities
+            const materialTotals = {};
+            let grandTotal = 0;
+            inventory.forEach(item => {
+                const type = item.material_type || 'Other';
+                materialTotals[type] = (materialTotals[type] || 0) + (item.quantity_kg || 0);
+                grandTotal += (item.quantity_kg || 0);
+            });
+
+            const colors = {
+                'PLA': '#22c55e',
+                'PETG': '#3b82f6',
+                'ABS': '#f59e0b',
+                'TPU': '#8b5cf6',
+                'Nylon': '#ec4899',
+                'CF-Nylon': '#6b7280',
+                'Other': '#94a3b8'
+            };
+
+            const html = Object.entries(materialTotals)
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, amount]) => {
+                    const percentage = grandTotal > 0 ? (amount / grandTotal * 100) : 0;
+                    const color = colors[type] || '#94a3b8';
+                    return `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 13px;">${type}</span>
+                            <div style="flex: 1; margin: 0 12px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px;">
+                                <div style="height: 100%; width: ${percentage}%; background: ${color}; border-radius: 3px;"></div>
+                            </div>
+                            <span style="font-size: 11px; color: var(--text-muted);">${amount.toFixed(1)}kg</span>
+                        </div>
+                    `;
+                }).join('');
+
+            container.innerHTML = html || '<p style="color: var(--text-muted); font-size: 12px; text-align: center;">No materials in inventory</p>';
+        }
+
+        // Update Popular Colors Chart with real inventory data
+        function updatePopularColorsChart() {
+            const container = document.getElementById('popularColorsChart');
+            if (!container) return;
+
+            const inventory = window.currentInventory || [];
+
+            if (inventory.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center; grid-column: 1/-1;">No color data yet</p>';
+                return;
+            }
+
+            // Group by color and sum quantities
+            const colorTotals = {};
+            inventory.forEach(item => {
+                const color = item.color || 'Unknown';
+                colorTotals[color] = (colorTotals[color] || 0) + (item.quantity_kg || 0);
+            });
+
+            const colorHex = {
+                'Black': '#000000',
+                'White': '#ffffff',
+                'Red': '#dc2626',
+                'Blue': '#2563eb',
+                'Green': '#16a34a',
+                'Yellow': '#eab308',
+                'Orange': '#f97316',
+                'Purple': '#9333ea',
+                'Pink': '#ec4899',
+                'Gray': '#6b7280',
+                'Clear': '#e5e7eb'
+            };
+
+            const topColors = Object.entries(colorTotals)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+
+            const html = topColors.map(([color, amount]) => {
+                const hex = colorHex[color] || '#94a3b8';
+                const displayAmount = amount >= 1 ? `${amount.toFixed(1)}kg` : `${(amount * 1000).toFixed(0)}g`;
+                return `
+                    <div style="text-align: center;">
+                        <div style="width: 32px; height: 32px; background: ${hex}; border-radius: 50%; margin: 0 auto 4px; border: 2px solid rgba(255,255,255,0.2);"></div>
+                        <div style="font-size: 10px; color: var(--text-muted);">${color}</div>
+                        <div style="font-size: 9px; color: var(--text-secondary);">${displayAmount}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = html || '<p style="color: var(--text-muted); font-size: 12px; text-align: center; grid-column: 1/-1;">No colors in inventory</p>';
+        }
+
+        // Update Order Status Chart with real order data
+        function updateOrderStatusChart(orders) {
+            const container = document.getElementById('orderStatusChart');
+            if (!container) return;
+
+            if (!orders || orders.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); font-size: 12px; text-align: center;">No orders yet</p>';
+                return;
+            }
+
+            const completed = orders.filter(o => o.status === 'completed' || o.status === 'delivered').length;
+            const inProgress = orders.filter(o => o.status === 'printing' || o.status === 'in_progress').length;
+            const pending = orders.filter(o => o.status === 'pending' || o.status === 'queued').length;
+            const total = orders.length;
+
+            const completedPct = total > 0 ? (completed / total * 100) : 0;
+            const inProgressPct = total > 0 ? (inProgress / total * 100) : 0;
+            const pendingPct = total > 0 ? (pending / total * 100) : 0;
+
+            container.innerHTML = `
+                <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(#22c55e 0% ${completedPct}%, #f59e0b ${completedPct}% ${completedPct + inProgressPct}%, #ef4444 ${completedPct + inProgressPct}% ${completedPct + inProgressPct + pendingPct}%, #6b7280 ${completedPct + inProgressPct + pendingPct}% 100%); position: relative;">
+                        <div style="width: 40px; height: 40px; background: var(--bg-card); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="width: 8px; height: 8px; background: #22c55e; border-radius: 50%;"></div>
+                        <span style="font-size: 12px;">Completed</span>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 600;">${completed} (${completedPct.toFixed(0)}%)</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="width: 8px; height: 8px; background: #f59e0b; border-radius: 50%;"></div>
+                        <span style="font-size: 12px;">In Progress</span>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 600;">${inProgress} (${inProgressPct.toFixed(0)}%)</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <div style="width: 8px; height: 8px; background: #ef4444; border-radius: 50%;"></div>
+                        <span style="font-size: 12px;">Pending</span>
+                    </div>
+                    <span style="font-size: 12px; font-weight: 600;">${pending} (${pendingPct.toFixed(0)}%)</span>
+                </div>
+            `;
+        }
 
         // Update dashboard metrics UI
         function updateDashboardMetrics(data) {
