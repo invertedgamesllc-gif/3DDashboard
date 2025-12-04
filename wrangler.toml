@@ -1,0 +1,19 @@
+name = "etsy-3d-print-api"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+workers_dev = true
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "etsy-3d-print-db"
+database_id = "67cfc673-ef9c-4b62-b4d3-de6c67872455"
+
+# R2 Storage binding
+[[r2_buckets]]
+binding = "FILES_BUCKET"
+bucket_name = "3d-files"
+
+# Environment variables
+[vars]
+CORS_ORIGIN = "*"

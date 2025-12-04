@@ -3,3 +3,22 @@ node_modules
 # Cloudflare config
 .env.cloudflare
 .wrangler/
+
+# Sensitive files - DO NOT COMMIT
+.env
+credentials.json
+token.json
+
+# IDE
+.claude/
+
+# Build artifacts
+dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Backup files
+*.backup
+*-backup-*

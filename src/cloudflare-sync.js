@@ -3,8 +3,8 @@
 
 class CloudflareSync {
     constructor() {
-        // Get worker URL from environment or use default
-        this.workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'http://localhost:8787';
+        // Get worker URL from environment or use production default
+        this.workerUrl = process.env.CLOUDFLARE_WORKER_URL || 'https://etsy-3d-print-api.royal-bush-a056.workers.dev';
         this.isConnected = false;
         this.syncInterval = null;
     }
