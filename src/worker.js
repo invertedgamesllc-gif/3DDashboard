@@ -116,6 +116,11 @@ export default {
                 return await handleGetActivity(request, env, corsHeaders);
             }
 
+            // Password reset endpoint (uses secret key)
+            if (path === '/api/auth/reset-password' && request.method === 'POST') {
+                return await handlePasswordReset(request, env, corsHeaders);
+            }
+
             // Route handling
             if (path === '/api/inquiries' && request.method === 'GET') {
                 return await handleGetInquiries(env, corsHeaders);
@@ -1430,6 +1435,61 @@ async function handleGetActivity(request, env, corsHeaders) {
         JSON.stringify({ activity: results }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
+}
+
+// Password reset (requires secret key)
+async function handlePasswordReset(request, env, corsHeaders) {
+    try {
+        const { username, newPassword, secretKey } = await request.json();
+
+        // Secret key for password reset - change this to something secure
+        const RESET_SECRET = 'inverted-games-reset-2024';
+
+        if (secretKey !== RESET_SECRET) {
+            return new Response(
+                JSON.stringify({ error: 'Invalid secret key' }),
+                { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+        }
+
+        if (!username || !newPassword) {
+            return new Response(
+                JSON.stringify({ error: 'Username and new password are required' }),
+                { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+        }
+
+        // Find user
+        const user = await env.DB.prepare(
+            "SELECT id FROM users WHERE username = ? OR email = ?"
+        ).bind(username, username).first();
+
+        if (!user) {
+            return new Response(
+                JSON.stringify({ error: 'User not found' }),
+                { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            );
+        }
+
+        // Hash new password
+        const newHash = await hashPassword(newPassword);
+
+        // Update password
+        await env.DB.prepare(
+            "UPDATE users SET password_hash = ? WHERE id = ?"
+        ).bind(newHash, user.id).run();
+
+        return new Response(
+            JSON.stringify({ success: true, message: 'Password reset successfully' }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+    } catch (error) {
+        console.error('Password reset error:', error);
+        return new Response(
+            JSON.stringify({ error: 'Password reset failed' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+    }
 }
 
 // ==================== END AUTHENTICATION HANDLERS ====================
