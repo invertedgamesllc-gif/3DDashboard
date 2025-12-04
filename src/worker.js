@@ -1383,13 +1383,17 @@ async function handleDeleteUser(userId, request, env, corsHeaders) {
         );
     }
 
-    // Delete user sessions first
+    // Delete all related data first (foreign key constraints)
     await env.DB.prepare("DELETE FROM sessions WHERE user_id = ?").bind(userId).run();
+    await env.DB.prepare("DELETE FROM activity_log WHERE user_id = ?").bind(userId).run();
+
+    // Clear created_by references in inquiries (set to null instead of deleting inquiries)
+    await env.DB.prepare("UPDATE inquiries SET created_by = NULL WHERE created_by = ?").bind(userId).run();
 
     // Delete user
     await env.DB.prepare("DELETE FROM users WHERE id = ?").bind(userId).run();
 
-    // Log activity
+    // Log activity (use current user, not deleted user)
     await logActivity(env, currentUser.id, 'delete_user', 'user', userId);
 
     return new Response(
