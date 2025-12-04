@@ -542,6 +542,9 @@
                 <button class="btn" onclick="doLogin()" style="width: 100%; padding: 1rem; font-size: 16px;">
                     Sign In
                 </button>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <a href="#" onclick="showSetup(); return false;" style="color: var(--text-muted); font-size: 13px; text-decoration: none;">First time? Create admin account</a>
+                </div>
             </div>
 
             <!-- Setup Form (shown only if no users exist) -->
@@ -2055,13 +2058,22 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    // Check if this is a "no users" error - need setup
-                    if (data.error && data.error.includes('Invalid credentials')) {
-                        errorEl.textContent = data.error || 'Login failed';
+                    // Check if we need setup (no users exist) by trying the setup endpoint
+                    const setupCheck = await fetch(`${cloudflareUrl}/api/auth/setup`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: '_check_', email: '_check_@test.com', password: '_check_' })
+                    });
+                    const setupData = await setupCheck.json();
+
+                    // If setup says "already completed", users exist - show login error
+                    // If setup would work (or different error), show setup screen
+                    if (setupData.error && setupData.error.includes('Setup already completed')) {
+                        errorEl.textContent = data.error || 'Invalid credentials';
                         errorEl.style.display = 'block';
                     } else {
-                        errorEl.textContent = data.error || 'Login failed';
-                        errorEl.style.display = 'block';
+                        // No users exist yet, show setup
+                        showSetup();
                     }
                     return;
                 }
