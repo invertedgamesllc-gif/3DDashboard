@@ -137,7 +137,7 @@ export default {
 
             if (path.startsWith('/api/inquiries/') && request.method === 'DELETE') {
                 const id = path.split('/')[3];
-                return await handleDeleteInquiry(id, env, corsHeaders);
+                return await handleDeleteInquiry(id, request, env, corsHeaders);
             }
 
             if (path.startsWith('/api/inquiries/') && request.method === 'PUT') {
@@ -165,7 +165,7 @@ export default {
 
             if (path.startsWith('/api/orders/') && request.method === 'DELETE') {
                 const id = path.split('/')[3];
-                return await handleDeleteOrder(id, env, corsHeaders);
+                return await handleDeleteOrder(id, request, env, corsHeaders);
             }
 
             // Printers API endpoints
@@ -380,6 +380,9 @@ async function handleGetInquiry(id, env, corsHeaders) {
 async function handleUpdateInquiry(id, request, env, corsHeaders) {
     const data = await request.json();
 
+    // Get current user if logged in
+    const currentUser = await getUserFromSession(request, env);
+
     // Check if inquiry exists
     const existing = await env.DB.prepare(
         "SELECT * FROM inquiries WHERE id = ?"
@@ -388,6 +391,9 @@ async function handleUpdateInquiry(id, request, env, corsHeaders) {
     if (!existing) {
         return new Response('Not Found', { status: 404, headers: corsHeaders });
     }
+
+    // Check for status change
+    const statusChanged = existing.status !== data.status;
 
     // Update inquiry
     await env.DB.prepare(
@@ -415,6 +421,17 @@ async function handleUpdateInquiry(id, request, env, corsHeaders) {
         data.totalCost || data.total_quote || 0,
         id
     ).run();
+
+    // Log activity if user is logged in
+    if (currentUser) {
+        if (statusChanged) {
+            await logActivity(env, currentUser.id, 'update_inquiry_status', 'inquiry', id,
+                `Changed status from "${existing.status}" to "${data.status}" for ${existing.customer_name}`);
+        } else {
+            await logActivity(env, currentUser.id, 'update_inquiry', 'inquiry', id,
+                `Updated inquiry for ${existing.customer_name}`);
+        }
+    }
 
     // Delete old files if new files are provided
     if (data.files && data.files.length >= 0) {
@@ -476,7 +493,15 @@ async function handleFileDelete(fileKey, env, corsHeaders) {
 // Get all orders
 async function handleGetOrders(env, corsHeaders) {
     const { results } = await env.DB.prepare(
-        "SELECT * FROM orders ORDER BY order_date DESC"
+        `SELECT o.*,
+            u1.username as created_by_username, u1.display_name as created_by_name,
+            u2.username as converted_by_username, u2.display_name as converted_by_name,
+            u3.username as status_changed_by_username, u3.display_name as status_changed_by_name
+         FROM orders o
+         LEFT JOIN users u1 ON o.created_by = u1.id
+         LEFT JOIN users u2 ON o.converted_by = u2.id
+         LEFT JOIN users u3 ON o.status_changed_by = u3.id
+         ORDER BY o.order_date DESC`
     ).all();
 
     return new Response(JSON.stringify({ orders: results }), {
@@ -489,12 +514,22 @@ async function handleCreateOrder(request, env, corsHeaders) {
     const data = await request.json();
     const id = data.id || `ORD-${Date.now()}`;
 
+    // Get current user if logged in
+    const currentUser = await getUserFromSession(request, env);
+    const userId = currentUser ? currentUser.id : null;
+
+    // Determine if this is a conversion from inquiry or direct creation
+    const isConversion = !!(data.inquiry_id || data.inquiryId);
+    const createdBy = isConversion ? null : userId;
+    const convertedBy = isConversion ? userId : null;
+
     await env.DB.prepare(
         `INSERT INTO orders (
             id, inquiry_id, customer_name, customer_email,
             material_type, material_color, material_weight,
-            total_amount, status, printer_assigned, notes
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+            total_amount, status, printer_assigned, notes,
+            created_by, converted_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(
         id,
         data.inquiry_id || data.inquiryId || null,
@@ -506,8 +541,19 @@ async function handleCreateOrder(request, env, corsHeaders) {
         data.total || data.totalAmount || 0,
         data.status || 'pending',
         data.assigned_printer || data.printer_assigned || data.printerAssigned || null,
-        data.notes || ''
+        data.notes || '',
+        createdBy,
+        convertedBy
     ).run();
+
+    // Log activity
+    if (currentUser) {
+        const action = isConversion ? 'convert_inquiry_to_order' : 'create_order';
+        const details = isConversion
+            ? `Converted inquiry ${data.inquiry_id || data.inquiryId} to order for ${data.customer_name || data.customerName}`
+            : `Created order for ${data.customer_name || data.customerName}`;
+        await logActivity(env, currentUser.id, action, 'order', id, details);
+    }
 
     return new Response(
         JSON.stringify({ success: true, order: { id, ...data } }),
@@ -536,29 +582,79 @@ async function handleGetOrder(id, env, corsHeaders) {
 async function handleUpdateOrder(id, request, env, corsHeaders) {
     const data = await request.json();
 
-    // Update order
-    await env.DB.prepare(
-        `UPDATE orders SET
-            customer_name = ?,
-            customer_email = ?,
-            material_type = ?,
-            material_color = ?,
-            material_weight = ?,
-            status = ?,
-            printer_assigned = ?,
-            notes = ?
-        WHERE id = ?`
-    ).bind(
-        data.customer_name || data.customerName || '',
-        data.customer_email || data.customerEmail || '',
-        data.material_type || data.materialType || 'PLA',
-        data.material_color || data.materialColor || '',
-        data.material_weight || data.materialWeight || 0,
-        data.status || 'pending',
-        data.printer_assigned || data.printerAssigned || null,
-        data.notes || '',
-        id
-    ).run();
+    // Get current user if logged in
+    const currentUser = await getUserFromSession(request, env);
+    const userId = currentUser ? currentUser.id : null;
+
+    // Get existing order to check for status change
+    const existingOrder = await env.DB.prepare(
+        "SELECT * FROM orders WHERE id = ?"
+    ).bind(id).first();
+
+    const newStatus = data.status || 'pending';
+    const statusChanged = existingOrder && existingOrder.status !== newStatus;
+
+    // Update order with status_changed_by if status is changing
+    if (statusChanged && userId) {
+        await env.DB.prepare(
+            `UPDATE orders SET
+                customer_name = ?,
+                customer_email = ?,
+                material_type = ?,
+                material_color = ?,
+                material_weight = ?,
+                status = ?,
+                printer_assigned = ?,
+                notes = ?,
+                status_changed_by = ?
+            WHERE id = ?`
+        ).bind(
+            data.customer_name || data.customerName || '',
+            data.customer_email || data.customerEmail || '',
+            data.material_type || data.materialType || 'PLA',
+            data.material_color || data.materialColor || '',
+            data.material_weight || data.materialWeight || 0,
+            newStatus,
+            data.printer_assigned || data.printerAssigned || null,
+            data.notes || '',
+            userId,
+            id
+        ).run();
+
+        // Log status change
+        await logActivity(env, userId, 'update_order_status', 'order', id,
+            `Changed status from "${existingOrder.status}" to "${newStatus}" for ${existingOrder.customer_name}`);
+    } else {
+        // Regular update without status_changed_by
+        await env.DB.prepare(
+            `UPDATE orders SET
+                customer_name = ?,
+                customer_email = ?,
+                material_type = ?,
+                material_color = ?,
+                material_weight = ?,
+                status = ?,
+                printer_assigned = ?,
+                notes = ?
+            WHERE id = ?`
+        ).bind(
+            data.customer_name || data.customerName || '',
+            data.customer_email || data.customerEmail || '',
+            data.material_type || data.materialType || 'PLA',
+            data.material_color || data.materialColor || '',
+            data.material_weight || data.materialWeight || 0,
+            newStatus,
+            data.printer_assigned || data.printerAssigned || null,
+            data.notes || '',
+            id
+        ).run();
+
+        // Log general update if user logged in
+        if (currentUser && existingOrder) {
+            await logActivity(env, userId, 'update_order', 'order', id,
+                `Updated order for ${existingOrder.customer_name}`);
+        }
+    }
 
     return new Response(
         JSON.stringify({ success: true, order: { id, ...data } }),
@@ -569,8 +665,11 @@ async function handleUpdateOrder(id, request, env, corsHeaders) {
 }
 
 // Delete order
-async function handleDeleteOrder(id, env, corsHeaders) {
+async function handleDeleteOrder(id, request, env, corsHeaders) {
     try {
+        // Get current user if logged in
+        const currentUser = await getUserFromSession(request, env);
+
         // First check if order exists
         const order = await env.DB.prepare(
             "SELECT * FROM orders WHERE id = ?"
@@ -616,6 +715,12 @@ async function handleDeleteOrder(id, env, corsHeaders) {
 
         // Delete the order
         await env.DB.prepare("DELETE FROM orders WHERE id = ?").bind(id).run();
+
+        // Log activity if user is logged in
+        if (currentUser) {
+            await logActivity(env, currentUser.id, 'delete_order', 'order', id,
+                `Deleted order for ${order.customer_name}${deletedInquiry ? ' and associated inquiry' : ''}`);
+        }
 
         console.log(`Deleted order ${id} with ${deletedFilesCount} R2 files${deletedInquiry ? ' and inquiry' : ''}`);
 
@@ -997,8 +1102,11 @@ async function handleGetStats(env, corsHeaders) {
 }
 
 // Delete inquiry
-async function handleDeleteInquiry(id, env, corsHeaders) {
+async function handleDeleteInquiry(id, request, env, corsHeaders) {
     try {
+        // Get current user if logged in
+        const currentUser = await getUserFromSession(request, env);
+
         // First check if inquiry exists
         const inquiry = await env.DB.prepare(
             "SELECT * FROM inquiries WHERE id = ?"
@@ -1037,6 +1145,12 @@ async function handleDeleteInquiry(id, env, corsHeaders) {
             "DELETE FROM inquiries WHERE id = ?"
         ).bind(id).run();
 
+        // Log activity if user is logged in
+        if (currentUser) {
+            await logActivity(env, currentUser.id, 'delete_inquiry', 'inquiry', id,
+                `Deleted inquiry for ${inquiry.customer_name}`);
+        }
+
         console.log(`Deleted inquiry ${id} with ${deletedFilesCount} R2 files`);
 
         return new Response(
@@ -1074,9 +1188,9 @@ async function handleLogin(request, env, corsHeaders) {
             );
         }
 
-        // Find user by username or email
+        // Find user by username or email (case-insensitive)
         const user = await env.DB.prepare(
-            "SELECT * FROM users WHERE (username = ? OR email = ?) AND is_active = 1"
+            "SELECT * FROM users WHERE (LOWER(username) = LOWER(?) OR LOWER(email) = LOWER(?)) AND is_active = 1"
         ).bind(username, username).first();
 
         if (!user) {
