@@ -504,6 +504,18 @@ async function handleGetOrders(env, corsHeaders) {
          ORDER BY o.order_date DESC`
     ).all();
 
+    // Get files for each order that has an associated inquiry
+    for (const order of results) {
+        if (order.inquiry_id) {
+            const { results: files } = await env.DB.prepare(
+                "SELECT * FROM files WHERE inquiry_id = ?"
+            ).bind(order.inquiry_id).all();
+            order.files = files || [];
+        } else {
+            order.files = [];
+        }
+    }
+
     return new Response(JSON.stringify({ orders: results }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
