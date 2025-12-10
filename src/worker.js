@@ -496,11 +496,13 @@ async function handleGetOrders(env, corsHeaders) {
         `SELECT o.*,
             u1.username as created_by_username, u1.display_name as created_by_name,
             u2.username as converted_by_username, u2.display_name as converted_by_name,
-            u3.username as status_changed_by_username, u3.display_name as status_changed_by_name
+            u3.username as status_changed_by_username, u3.display_name as status_changed_by_name,
+            p.name as printer_name
          FROM orders o
          LEFT JOIN users u1 ON o.created_by = u1.id
          LEFT JOIN users u2 ON o.converted_by = u2.id
          LEFT JOIN users u3 ON o.status_changed_by = u3.id
+         LEFT JOIN printers p ON o.printer_assigned = p.id
          ORDER BY o.order_date DESC`
     ).all();
 
