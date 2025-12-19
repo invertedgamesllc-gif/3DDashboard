@@ -1797,6 +1797,86 @@ function getEbayConfig(env) {
     };
 }
 
+// Send Discord notification for new eBay order
+async function sendDiscordNotification(env, order) {
+    try {
+        const webhookUrl = env.DISCORD_WEBHOOK_URL;
+        if (!webhookUrl) {
+            console.log('Discord webhook URL not configured, skipping notification');
+            return;
+        }
+
+        const shipByDate = order.shipByDate ? new Date(order.shipByDate) : null;
+        const isUrgent = shipByDate && (shipByDate - new Date()) < 24 * 60 * 60 * 1000;
+
+        const embed = {
+            title: "🛒 New eBay Order!",
+            color: isUrgent ? 0xef4444 : 0x22c55e, // Red if urgent, green otherwise
+            fields: [
+                {
+                    name: "Order ID",
+                    value: order.orderId || 'N/A',
+                    inline: true
+                },
+                {
+                    name: "Buyer",
+                    value: order.buyerUsername || 'Unknown',
+                    inline: true
+                },
+                {
+                    name: "Total",
+                    value: `$${(order.totalPrice || 0).toFixed(2)}`,
+                    inline: true
+                },
+                {
+                    name: "Item",
+                    value: order.itemTitle || 'Unknown Item',
+                    inline: false
+                },
+                {
+                    name: "Quantity",
+                    value: String(order.quantity || 1),
+                    inline: true
+                },
+                {
+                    name: "Ship To",
+                    value: `${order.shipToCity}, ${order.shipToState} ${order.shipToZip}`,
+                    inline: true
+                },
+                {
+                    name: isUrgent ? "⚠️ Ship By (URGENT!)" : "Ship By",
+                    value: shipByDate ? shipByDate.toLocaleDateString() : 'N/A',
+                    inline: true
+                }
+            ],
+            timestamp: new Date().toISOString(),
+            footer: {
+                text: "eBay Order Notification"
+            }
+        };
+
+        if (isUrgent) {
+            embed.description = "⚠️ **URGENT: Ship within 24 hours!**";
+        }
+
+        const response = await fetch(webhookUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                embeds: [embed]
+            })
+        });
+
+        if (!response.ok) {
+            console.error('Failed to send Discord notification:', response.status);
+        }
+    } catch (error) {
+        console.error('Error sending Discord notification:', error);
+    }
+}
+
 // eBay Handler Functions
 async function handleGetEbayOrders(request, env, corsHeaders) {
     try {
@@ -1900,6 +1980,10 @@ async function handleSyncEbayOrders(request, env, corsHeaders) {
                     order.paidTime,
                     order.shippedTime
                 ).run();
+
+                // Send Discord notification for new order
+                await sendDiscordNotification(env, order);
+
                 syncedCount++;
             }
         }
