@@ -216,6 +216,25 @@ export default {
                 return await handleDeleteInventoryItem(id, env, corsHeaders);
             }
 
+            // eBay Orders API endpoints
+            if (path === '/api/ebay-orders' && request.method === 'GET') {
+                return await handleGetEbayOrders(request, env, corsHeaders);
+            }
+
+            if (path === '/api/ebay-orders/sync' && request.method === 'POST') {
+                return await handleSyncEbayOrders(request, env, corsHeaders);
+            }
+
+            if (path.startsWith('/api/ebay-orders/') && request.method === 'PUT') {
+                const id = path.split('/')[3];
+                return await handleUpdateEbayOrder(id, request, env, corsHeaders);
+            }
+
+            if (path.startsWith('/api/ebay-orders/') && request.method === 'DELETE') {
+                const id = path.split('/')[3];
+                return await handleDeleteEbayOrder(id, request, env, corsHeaders);
+            }
+
             if (path === '/api/upload' && request.method === 'POST') {
                 return await handleFileUpload(request, env, corsHeaders);
             }
@@ -1763,5 +1782,261 @@ async function handleForceCleanup(env, corsHeaders) {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             }
         );
+    }
+}
+
+// eBay API Configuration - credentials stored in environment variables
+function getEbayConfig(env) {
+    return {
+        appId: env.EBAY_APP_ID,
+        devId: env.EBAY_DEV_ID,
+        certId: env.EBAY_CERT_ID,
+        userToken: env.EBAY_USER_TOKEN,
+        apiUrl: 'https://api.ebay.com',
+        sandboxUrl: 'https://api.sandbox.ebay.com'
+    };
+}
+
+// eBay Handler Functions
+async function handleGetEbayOrders(request, env, corsHeaders) {
+    try {
+        const user = await getUserFromSession(request, env);
+        if (!user) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        const { results } = await env.DB.prepare(
+            `SELECT * FROM ebay_orders ORDER BY ship_by_date ASC, created_time DESC`
+        ).all();
+
+        return new Response(JSON.stringify({ orders: results }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+}
+
+async function handleSyncEbayOrders(request, env, corsHeaders) {
+    try {
+        const user = await getUserFromSession(request, env);
+        if (!user) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        // Call eBay API to get orders
+        const ebayOrders = await fetchEbayOrders(env);
+
+        let syncedCount = 0;
+        let updatedCount = 0;
+
+        for (const order of ebayOrders) {
+            // Check if order already exists
+            const existing = await env.DB.prepare(
+                "SELECT id FROM ebay_orders WHERE order_id = ?"
+            ).bind(order.orderId).first();
+
+            if (existing) {
+                // Update existing order
+                await env.DB.prepare(`
+                    UPDATE ebay_orders
+                    SET tracking_number = ?,
+                        order_status = ?,
+                        shipped_time = ?,
+                        last_updated = CURRENT_TIMESTAMP
+                    WHERE order_id = ?
+                `).bind(
+                    order.trackingNumber,
+                    order.orderStatus,
+                    order.shippedTime,
+                    order.orderId
+                ).run();
+                updatedCount++;
+            } else {
+                // Insert new order
+                const id = crypto.randomUUID();
+                await env.DB.prepare(`
+                    INSERT INTO ebay_orders (
+                        id, order_id, buyer_username, buyer_email, item_title, item_sku,
+                        quantity, total_price, currency, ship_to_name, ship_to_address1,
+                        ship_to_address2, ship_to_city, ship_to_state, ship_to_zip,
+                        ship_to_country, shipping_service, ship_by_date, delivery_date,
+                        tracking_number, order_status, payment_status, created_time,
+                        paid_time, shipped_time
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `).bind(
+                    id,
+                    order.orderId,
+                    order.buyerUsername,
+                    order.buyerEmail,
+                    order.itemTitle,
+                    order.itemSku,
+                    order.quantity,
+                    order.totalPrice,
+                    order.currency,
+                    order.shipToName,
+                    order.shipToAddress1,
+                    order.shipToAddress2,
+                    order.shipToCity,
+                    order.shipToState,
+                    order.shipToZip,
+                    order.shipToCountry,
+                    order.shippingService,
+                    order.shipByDate,
+                    order.deliveryDate,
+                    order.trackingNumber,
+                    order.orderStatus,
+                    order.paymentStatus,
+                    order.createdTime,
+                    order.paidTime,
+                    order.shippedTime
+                ).run();
+                syncedCount++;
+            }
+        }
+
+        await logActivity(env, user.id, 'sync_ebay_orders', 'ebay_orders', null, `Synced ${syncedCount} new, updated ${updatedCount}`);
+
+        return new Response(JSON.stringify({
+            success: true,
+            synced: syncedCount,
+            updated: updatedCount,
+            total: ebayOrders.length
+        }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+}
+
+async function handleUpdateEbayOrder(id, request, env, corsHeaders) {
+    try {
+        const user = await getUserFromSession(request, env);
+        if (!user) {
+            return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+                status: 401,
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+        }
+
+        const data = await request.json();
+
+        await env.DB.prepare(`
+            UPDATE ebay_orders
+            SET tracking_number = ?,
+                order_status = ?,
+                notes = ?,
+                shipped_time = ?,
+                last_updated = CURRENT_TIMESTAMP
+            WHERE id = ?
+        `).bind(
+            data.trackingNumber || null,
+            data.orderStatus || 'pending',
+            data.notes || null,
+            data.shippedTime || null,
+            id
+        ).run();
+
+        await logActivity(env, user.id, 'update_ebay_order', 'ebay_orders', id);
+
+        return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+}
+
+async function handleDeleteEbayOrder(id, env, corsHeaders) {
+    try {
+        await env.DB.prepare("DELETE FROM ebay_orders WHERE id = ?").bind(id).run();
+
+        return new Response(JSON.stringify({ success: true }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    } catch (error) {
+        return new Response(JSON.stringify({ error: error.message }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+    }
+}
+
+// Fetch orders from eBay API
+async function fetchEbayOrders(env) {
+    try {
+        const config = getEbayConfig(env);
+
+        // eBay API call using REST API
+        const response = await fetch(`${config.apiUrl}/sell/fulfillment/v1/order`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${config.userToken}`,
+                'Content-Type': 'application/json',
+                'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`eBay API error: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Transform eBay API response to our format
+        const orders = (data.orders || []).map(order => {
+            const lineItem = order.lineItems?.[0] || {};
+            const fulfillment = lineItem.fulfillment || {};
+            const shippingAddress = fulfillment.shippingAddress || {};
+
+            return {
+                orderId: order.orderId,
+                buyerUsername: order.buyer?.username || '',
+                buyerEmail: order.buyer?.buyerRegistrationEmail || '',
+                itemTitle: lineItem.title || '',
+                itemSku: lineItem.sku || '',
+                quantity: lineItem.quantity || 1,
+                totalPrice: parseFloat(order.pricingSummary?.total?.value || 0),
+                currency: order.pricingSummary?.total?.currency || 'USD',
+                shipToName: shippingAddress.fullName || '',
+                shipToAddress1: shippingAddress.addressLine1 || '',
+                shipToAddress2: shippingAddress.addressLine2 || '',
+                shipToCity: shippingAddress.city || '',
+                shipToState: shippingAddress.stateOrProvince || '',
+                shipToZip: shippingAddress.postalCode || '',
+                shipToCountry: shippingAddress.countryCode || '',
+                shippingService: fulfillment.shippingServiceCode || '',
+                shipByDate: fulfillment.shipByDate || null,
+                deliveryDate: fulfillment.maxEstimatedDeliveryDate || null,
+                trackingNumber: fulfillment.shipmentTrackingNumber || null,
+                orderStatus: order.orderFulfillmentStatus || 'pending',
+                paymentStatus: order.orderPaymentStatus || '',
+                createdTime: order.creationDate || new Date().toISOString(),
+                paidTime: order.paidDate || null,
+                shippedTime: fulfillment.shippedDate || null
+            };
+        });
+
+        return orders;
+    } catch (error) {
+        console.error('Error fetching eBay orders:', error);
+        // Return empty array on error to prevent sync failures
+        return [];
     }
 }

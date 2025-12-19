@@ -586,6 +586,7 @@
         <div class="nav-tab" onclick="switchTab('inquiries')">Inquiries</div>
         <div class="nav-tab" onclick="switchTab('orders')">Orders</div>
         <div class="nav-tab" onclick="switchTab('completed')">Completed Orders</div>
+        <div class="nav-tab" onclick="switchTab('ebay-orders')">eBay Orders</div>
         <div class="nav-tab" onclick="switchTab('inventory')">Inventory</div>
         <div class="nav-tab" onclick="switchTab('printers')">Printers</div>
         <div class="nav-tab" id="usersTab" style="display: none;" onclick="switchTab('users')">Users</div>
@@ -1170,6 +1171,73 @@
                     <div style="font-size: 48px; margin-bottom: 1rem; opacity: 0.5;">📭</div>
                     <h3 style="font-size: 18px; margin-bottom: 0.5rem; color: var(--text-secondary);">No Completed Orders Yet</h3>
                     <p style="font-size: 14px;">Completed and shipped orders will appear here for tracking.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- eBay Orders -->
+        <div class="page-content" id="ebay-orders">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                <div>
+                    <h1 style="font-size: 28px; font-weight: 800; margin: 0; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">🛒 eBay Orders</h1>
+                    <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 14px;">Manage and fulfill your eBay orders</p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-secondary" onclick="syncEbayOrders()" style="padding: 8px 16px;" id="syncEbayBtn">🔄 Sync from eBay</button>
+                    <button class="btn" onclick="loadEbayOrders()" style="padding: 8px 16px;">🔃 Refresh</button>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 2rem;">
+                <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.05) 100%); border: 1px solid rgba(239, 68, 68, 0.2);">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">⏰ Urgent</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #ef4444;" id="ebayUrgentCount">0</div>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Ship within 24h</div>
+                </div>
+                <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(251, 146, 60, 0.1) 0%, rgba(234, 88, 12, 0.05) 100%); border: 1px solid rgba(251, 146, 60, 0.2);">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">📦 Pending</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #f59e0b;" id="ebayPendingCount">0</div>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">Awaiting fulfillment</div>
+                </div>
+                <div class="card" style="padding: 20px; background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%); border: 1px solid rgba(34, 197, 94, 0.2);">
+                    <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">✅ Shipped</div>
+                    <div style="font-size: 28px; font-weight: 700; color: #22c55e;" id="ebayShippedCount">0</div>
+                    <div style="font-size: 11px; color: var(--text-secondary); margin-top: 4px;">This week</div>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 16px; border-bottom: 1px solid var(--border-secondary); background: rgba(255, 255, 255, 0.02);">
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0; color: var(--text-primary);">📋 Order List</h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead style="background: rgba(255, 255, 255, 0.05);">
+                            <tr>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Order ID</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Buyer</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Item</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Ship To</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Ship By</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Total</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Tracking</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Status</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ebayOrdersTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyEbayOrdersState" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+                    <div style="font-size: 48px; margin-bottom: 1rem; opacity: 0.5;">📭</div>
+                    <h3 style="font-size: 18px; margin-bottom: 0.5rem; color: var(--text-secondary);">No eBay Orders</h3>
+                    <p style="font-size: 14px;">Click "Sync from eBay" to fetch your latest orders.</p>
                 </div>
             </div>
         </div>
@@ -2388,6 +2456,8 @@
                 loadOrders();
             } else if (tabName === 'completed') {
                 loadCompletedOrders();
+            } else if (tabName === 'ebay-orders') {
+                loadEbayOrders();
             } else if (tabName === 'inventory') {
                 loadInventory();
             } else if (tabName === 'printers') {
@@ -4095,6 +4165,207 @@ Generated by 3D Print Business Manager
             localStorage.setItem('orders', JSON.stringify(existingOrders));
             loadOrders();
             showNotification(`Synced ${newOrdersCount} new orders from inquiries`, 'success');
+        };
+
+        // eBay Orders Functions
+        window.loadEbayOrders = async function() {
+            try {
+                const cloudflareUrl = getCloudflareUrl();
+                const response = await authFetch(`${cloudflareUrl}/api/ebay-orders`);
+
+                if (!response.ok) {
+                    throw new Error('Failed to load eBay orders');
+                }
+
+                const data = await response.json();
+                const orders = data.orders || [];
+
+                displayEbayOrders(orders);
+                updateEbayStats(orders);
+            } catch (error) {
+                console.error('Error loading eBay orders:', error);
+                displayEbayOrders([]);
+                showNotification('Failed to load eBay orders', 'error');
+            }
+        };
+
+        window.syncEbayOrders = async function() {
+            const syncBtn = document.getElementById('syncEbayBtn');
+            const originalText = syncBtn.innerHTML;
+            syncBtn.innerHTML = '⏳ Syncing...';
+            syncBtn.disabled = true;
+
+            try {
+                const cloudflareUrl = getCloudflareUrl();
+                const response = await authFetch(`${cloudflareUrl}/api/ebay-orders/sync`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to sync eBay orders');
+                }
+
+                const data = await response.json();
+                showNotification(`Synced ${data.synced} new orders, updated ${data.updated}`, 'success');
+                await loadEbayOrders();
+            } catch (error) {
+                console.error('Error syncing eBay orders:', error);
+                showNotification('Failed to sync eBay orders: ' + error.message, 'error');
+            } finally {
+                syncBtn.innerHTML = originalText;
+                syncBtn.disabled = false;
+            }
+        };
+
+        function displayEbayOrders(orders) {
+            const tableBody = document.getElementById('ebayOrdersTableBody');
+            const emptyState = document.getElementById('emptyEbayOrdersState');
+
+            if (orders.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            tableBody.innerHTML = orders.map(order => {
+                const shipByDate = order.ship_by_date ? new Date(order.ship_by_date) : null;
+                const isUrgent = shipByDate && (shipByDate - new Date()) < 24 * 60 * 60 * 1000;
+                const shipByFormatted = shipByDate ? shipByDate.toLocaleDateString() : '-';
+                const statusBadge = getEbayStatusBadge(order.order_status);
+                const shippingAddress = `${order.ship_to_city}, ${order.ship_to_state} ${order.ship_to_zip}`;
+
+                return `
+                    <tr style="border-bottom: 1px solid var(--border-secondary); ${isUrgent ? 'background: rgba(239, 68, 68, 0.05);' : ''}">
+                        <td style="padding: 12px; color: var(--text-primary); font-weight: 600; font-size: 12px;">${order.order_id || '#' + order.id.slice(-6)}</td>
+                        <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">${order.buyer_username || 'N/A'}</div>
+                            <div style="font-size: 11px;">${order.buyer_email || ''}</div>
+                        </td>
+                        <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                            <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">${order.item_title || 'Unknown Item'}</div>
+                            ${order.item_sku ? `<div style="font-size: 10px; color: var(--text-muted);">SKU: ${order.item_sku}</div>` : ''}
+                            ${order.quantity > 1 ? `<div style="font-size: 10px; color: var(--text-muted);">Qty: ${order.quantity}</div>` : ''}
+                        </td>
+                        <td style="padding: 12px; color: var(--text-secondary); font-size: 11px;">
+                            <div style="font-weight: 500; color: var(--text-primary);">${order.ship_to_name || ''}</div>
+                            <div>${shippingAddress}</div>
+                            ${order.ship_to_country !== 'US' ? `<div style="color: #f59e0b;">🌍 ${order.ship_to_country}</div>` : ''}
+                        </td>
+                        <td style="padding: 12px; color: ${isUrgent ? '#ef4444' : 'var(--text-secondary)'}; font-size: 12px; font-weight: ${isUrgent ? '700' : '400'};">
+                            ${isUrgent ? '⚠️ ' : ''}${shipByFormatted}
+                        </td>
+                        <td style="padding: 12px; color: #22c55e; font-weight: 700; font-size: 13px;">$${(order.total_price || 0).toFixed(2)}</td>
+                        <td style="padding: 12px; font-size: 11px;">
+                            ${order.tracking_number ?
+                                `<div style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 10px;">${order.tracking_number}</div>` :
+                                `<button onclick="addEbayTracking('${order.id}')" class="btn-secondary" style="padding: 4px 8px; font-size: 11px;">+ Add Tracking</button>`
+                            }
+                        </td>
+                        <td style="padding: 12px;">${statusBadge}</td>
+                        <td style="padding: 12px;">
+                            <div style="display: flex; gap: 4px;">
+                                <button onclick="viewEbayOrder('${order.id}')" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">View</button>
+                                <button onclick="markEbayShipped('${order.id}')" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Ship</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateEbayStats(orders) {
+            const now = new Date();
+            const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+            const urgent = orders.filter(o => {
+                const shipBy = o.ship_by_date ? new Date(o.ship_by_date) : null;
+                return shipBy && shipBy < oneDayFromNow && o.order_status !== 'shipped';
+            }).length;
+
+            const pending = orders.filter(o => o.order_status === 'pending' || o.order_status === 'IN_PROGRESS').length;
+
+            const shipped = orders.filter(o => {
+                const shippedDate = o.shipped_time ? new Date(o.shipped_time) : null;
+                return o.order_status === 'shipped' || (shippedDate && shippedDate > oneWeekAgo);
+            }).length;
+
+            document.getElementById('ebayUrgentCount').textContent = urgent;
+            document.getElementById('ebayPendingCount').textContent = pending;
+            document.getElementById('ebayShippedCount').textContent = shipped;
+        }
+
+        function getEbayStatusBadge(status) {
+            const statusMap = {
+                'pending': { color: '#f59e0b', bg: 'rgba(251, 146, 60, 0.1)', text: 'Pending' },
+                'IN_PROGRESS': { color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', text: 'Processing' },
+                'FULFILLED': { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)', text: 'Fulfilled' },
+                'shipped': { color: '#22c55e', bg: 'rgba(34, 197, 94, 0.1)', text: 'Shipped' },
+                'CANCELLED': { color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', text: 'Cancelled' }
+            };
+
+            const statusInfo = statusMap[status] || statusMap['pending'];
+            return `<span style="background: ${statusInfo.bg}; color: ${statusInfo.color}; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">${statusInfo.text}</span>`;
+        }
+
+        window.addEbayTracking = async function(orderId) {
+            const tracking = prompt('Enter tracking number:');
+            if (!tracking) return;
+
+            try {
+                const cloudflareUrl = getCloudflareUrl();
+                const response = await authFetch(`${cloudflareUrl}/api/ebay-orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        trackingNumber: tracking,
+                        orderStatus: 'shipped',
+                        shippedTime: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update tracking');
+                }
+
+                showNotification('Tracking number added successfully', 'success');
+                await loadEbayOrders();
+            } catch (error) {
+                console.error('Error adding tracking:', error);
+                showNotification('Failed to add tracking number', 'error');
+            }
+        };
+
+        window.markEbayShipped = async function(orderId) {
+            if (!confirm('Mark this order as shipped?')) return;
+
+            try {
+                const cloudflareUrl = getCloudflareUrl();
+                const response = await authFetch(`${cloudflareUrl}/api/ebay-orders/${orderId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderStatus: 'shipped',
+                        shippedTime: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update status');
+                }
+
+                showNotification('Order marked as shipped', 'success');
+                await loadEbayOrders();
+            } catch (error) {
+                console.error('Error updating status:', error);
+                showNotification('Failed to update order status', 'error');
+            }
+        };
+
+        window.viewEbayOrder = function(orderId) {
+            showNotification('Order details view coming soon', 'info');
         };
 
         // Show add order modal
