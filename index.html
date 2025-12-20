@@ -808,7 +808,7 @@
 </head>
 <body>
     <!-- Cloudflare Usage Bar -->
-    <div class="cloudflare-bar">
+    <div class="cloudflare-bar" id="mainCloudflareBar">
         <div class="cf-title">
             <span>☁️</span>
             <span>Cloudflare Status</span>
@@ -820,7 +820,7 @@
             </div>
 
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="mainSidebar">
         <div class="sidebar-header">
             <div class="brand">
                 <div class="brand-icon">
@@ -3509,6 +3509,8 @@
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('mainNav').style.display = 'none';
             document.getElementById('cloudflareUsageBar').style.display = 'none';
+            document.getElementById('mainCloudflareBar').style.display = 'none';
+            document.getElementById('mainSidebar').style.display = 'none';
             document.querySelector('.main-content').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('setupForm').style.display = 'none';
@@ -3518,6 +3520,8 @@
             document.getElementById('loginOverlay').style.display = 'flex';
             document.getElementById('mainNav').style.display = 'none';
             document.getElementById('cloudflareUsageBar').style.display = 'none';
+            document.getElementById('mainCloudflareBar').style.display = 'none';
+            document.getElementById('mainSidebar').style.display = 'none';
             document.querySelector('.main-content').style.display = 'none';
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('setupForm').style.display = 'block';
@@ -3525,8 +3529,10 @@
 
         function showApp() {
             document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainNav').style.display = 'flex';
-            document.getElementById('cloudflareUsageBar').style.display = 'flex';
+            document.getElementById('mainNav').style.display = 'none'; // Hide old nav
+            document.getElementById('cloudflareUsageBar').style.display = 'none'; // Hide old cloudflare bar
+            document.getElementById('mainCloudflareBar').style.display = 'flex'; // Show new cloudflare bar
+            document.getElementById('mainSidebar').style.display = 'flex'; // Show new sidebar
             document.querySelector('.main-content').style.display = 'block';
 
             // Update user display
