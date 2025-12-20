@@ -3507,10 +3507,14 @@
 
         function showLogin() {
             document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('mainNav').style.display = 'none';
-            document.getElementById('cloudflareUsageBar').style.display = 'none';
-            document.getElementById('mainCloudflareBar').style.display = 'none';
-            document.getElementById('mainSidebar').style.display = 'none';
+            const mainNav = document.getElementById('mainNav');
+            if (mainNav) mainNav.style.display = 'none';
+            const cloudflareUsageBar = document.getElementById('cloudflareUsageBar');
+            if (cloudflareUsageBar) cloudflareUsageBar.style.display = 'none';
+            const mainCloudflareBar = document.getElementById('mainCloudflareBar');
+            if (mainCloudflareBar) mainCloudflareBar.style.display = 'none';
+            const mainSidebar = document.getElementById('mainSidebar');
+            if (mainSidebar) mainSidebar.style.display = 'none';
             document.querySelector('.main-content').style.display = 'none';
             document.getElementById('loginForm').style.display = 'block';
             document.getElementById('setupForm').style.display = 'none';
@@ -3518,10 +3522,14 @@
 
         function showSetup() {
             document.getElementById('loginOverlay').style.display = 'flex';
-            document.getElementById('mainNav').style.display = 'none';
-            document.getElementById('cloudflareUsageBar').style.display = 'none';
-            document.getElementById('mainCloudflareBar').style.display = 'none';
-            document.getElementById('mainSidebar').style.display = 'none';
+            const mainNav = document.getElementById('mainNav');
+            if (mainNav) mainNav.style.display = 'none';
+            const cloudflareUsageBar = document.getElementById('cloudflareUsageBar');
+            if (cloudflareUsageBar) cloudflareUsageBar.style.display = 'none';
+            const mainCloudflareBar = document.getElementById('mainCloudflareBar');
+            if (mainCloudflareBar) mainCloudflareBar.style.display = 'none';
+            const mainSidebar = document.getElementById('mainSidebar');
+            if (mainSidebar) mainSidebar.style.display = 'none';
             document.querySelector('.main-content').style.display = 'none';
             document.getElementById('loginForm').style.display = 'none';
             document.getElementById('setupForm').style.display = 'block';
@@ -3529,10 +3537,14 @@
 
         function showApp() {
             document.getElementById('loginOverlay').style.display = 'none';
-            document.getElementById('mainNav').style.display = 'none'; // Hide old nav
-            document.getElementById('cloudflareUsageBar').style.display = 'none'; // Hide old cloudflare bar
-            document.getElementById('mainCloudflareBar').style.display = 'flex'; // Show new cloudflare bar
-            document.getElementById('mainSidebar').style.display = 'flex'; // Show new sidebar
+            const mainNav = document.getElementById('mainNav');
+            if (mainNav) mainNav.style.display = 'none'; // Hide old nav
+            const cloudflareUsageBar = document.getElementById('cloudflareUsageBar');
+            if (cloudflareUsageBar) cloudflareUsageBar.style.display = 'none'; // Hide old cloudflare bar
+            const mainCloudflareBar = document.getElementById('mainCloudflareBar');
+            if (mainCloudflareBar) mainCloudflareBar.style.display = 'flex'; // Show new cloudflare bar
+            const mainSidebar = document.getElementById('mainSidebar');
+            if (mainSidebar) mainSidebar.style.display = 'flex'; // Show new sidebar
             document.querySelector('.main-content').style.display = 'block';
 
             // Update user display
