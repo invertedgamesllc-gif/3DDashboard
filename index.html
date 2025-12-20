@@ -469,11 +469,7 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .main-content {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        /* Duplicate .main-content removed - using sidebar version */
 
         .page-content {
             display: none;
@@ -816,35 +812,35 @@
         <div class="cf-stats">
             <div class="cf-stat">
                 <span class="cf-label">📁 Files</span>
-                <span class="cf-value">1,247</span>
+                <span class="cf-value" id="cfFilesCount">0</span>
             </div>
             <div class="cf-stat">
                 <span class="cf-label">📦 Orders</span>
-                <span class="cf-value">856</span>
+                <span class="cf-value" id="cfOrdersCount">0</span>
             </div>
             <div class="cf-stat">
                 <span class="cf-label">💬 Inquiries</span>
-                <span class="cf-value">342</span>
+                <span class="cf-value" id="cfInquiriesCount">0</span>
             </div>
             <div class="cf-progress-wrapper">
                 <div class="cf-progress-header">
                     <span class="cf-progress-label">Storage Used</span>
-                    <span class="cf-progress-value">50 MB / 10 GB</span>
+                    <span class="cf-progress-value" id="cfStorageUsed">0 MB / 10 GB</span>
                 </div>
                 <div class="cf-progress">
-                    <div class="cf-progress-fill" style="width: 0.5%"></div>
+                    <div class="cf-progress-fill" id="cfStorageProgress" style="width: 0%"></div>
                 </div>
             </div>
             <div class="cf-progress-wrapper">
                 <div class="cf-progress-header">
                     <span class="cf-progress-label">Database Rows</span>
-                    <span class="cf-progress-value">2,445 / 100K</span>
+                    <span class="cf-progress-value" id="cfDbRows">0 / 100K</span>
                 </div>
                 <div class="cf-progress">
-                    <div class="cf-progress-fill" style="width: 2.4%"></div>
+                    <div class="cf-progress-fill" id="cfDbProgress" style="width: 0%"></div>
                 </div>
             </div>
-            <span class="cf-badge">✓ Connected</span>
+            <span class="cf-badge" id="cfStatus">✓ Connected</span>
         </div>
     </div>
 
@@ -852,8 +848,8 @@
     <aside class="sidebar" id="mainSidebar">
         <div class="sidebar-header">
             <div class="brand">
-                <div class="brand-icon" style="background: var(--accent-gradient); font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; color: white;">
-                    IG
+                <div class="brand-icon">
+                    <img src="inverted-logo.png" alt="Inverted Games Logo">
                 </div>
                 <div class="brand-name">
                     <h1>3D Print Manager</h1>
@@ -1081,11 +1077,7 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .main-content {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        /* Duplicate .main-content removed - using sidebar version */
 
         .page-content {
             display: none;
@@ -1605,11 +1597,7 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .main-content {
-            padding: 2rem;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        /* Duplicate .main-content removed - using sidebar version */
 
         .page-content {
             display: none;
@@ -3902,6 +3890,34 @@
         }
 
         // ==================== END AUTHENTICATION ====================
+
+        // Update Cloudflare stats bar
+        function updateCloudflareStats() {
+            // Files count - count all uploaded files
+            const filesCount = document.querySelectorAll('#inquiriesTable tbody tr').length || 0;
+            document.getElementById('cfFilesCount').textContent = filesCount;
+
+            // Orders count - active + completed
+            const ordersCount = (document.querySelectorAll('#ordersTable tbody tr').length || 0) +
+                               (document.querySelectorAll('#completedOrdersTable tbody tr').length || 0);
+            document.getElementById('cfOrdersCount').textContent = ordersCount;
+
+            // Inquiries count
+            const inquiriesCount = document.querySelectorAll('#inquiriesTable tbody tr').length || 0;
+            document.getElementById('cfInquiriesCount').textContent = inquiriesCount;
+
+            // Estimate storage (rough calculation)
+            const storageMB = Math.round((filesCount * 0.5) + (inquiriesCount * 0.1));
+            const storagePercent = (storageMB / 10240) * 100; // Out of 10GB
+            document.getElementById('cfStorageUsed').textContent = `${storageMB} MB / 10 GB`;
+            document.getElementById('cfStorageProgress').style.width = `${Math.min(storagePercent, 100)}%`;
+
+            // Estimate database rows
+            const dbRows = filesCount + inquiriesCount + ordersCount;
+            const dbPercent = (dbRows / 100000) * 100;
+            document.getElementById('cfDbRows').textContent = `${dbRows.toLocaleString()} / 100K`;
+            document.getElementById('cfDbProgress').style.width = `${Math.min(dbPercent, 100)}%`;
+        }
 
         // Basic tab switching - Make it global immediately
         window.switchTab = function(tabName) {
@@ -8196,6 +8212,9 @@ Generated by 3D Print Business Manager
 
                 // Update the Cloudflare usage bar with current stats
                 await updateCloudflareUsageBar();
+
+                // Update Cloudflare stats bar after data loads
+                setTimeout(updateCloudflareStats, 1000);
 
                 // Trigger initial material price and color update
                 updateMaterialPrice();
