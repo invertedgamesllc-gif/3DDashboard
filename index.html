@@ -797,22 +797,22 @@
                 <div class="nav-item" onclick="switchTab('inquiries')">
                     <span class="nav-icon">💬</span>
                     <span>Inquiries</span>
-                    <span class="nav-badge">12</span>
+                    <span class="nav-badge" id="sidebarInquiriesBadge">0</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('orders')">
                     <span class="nav-icon">📦</span>
                     <span>Orders</span>
-                    <span class="nav-badge">8</span>
+                    <span class="nav-badge" id="sidebarOrdersBadge">0</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('completed')">
                     <span class="nav-icon">✅</span>
                     <span>Completed Orders</span>
-                    <span class="nav-badge">142</span>
+                    <span class="nav-badge" id="sidebarCompletedBadge">0</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('ebay-orders')">
                     <span class="nav-icon">🛒</span>
                     <span>eBay Orders</span>
-                    <span class="nav-badge">3</span>
+                    <span class="nav-badge" id="sidebarEbayBadge">0</span>
                 </div>
             </div>
 
@@ -825,12 +825,12 @@
                 <div class="nav-item" onclick="switchTab('printers')">
                     <span class="nav-icon">🖨️</span>
                     <span>Printers</span>
-                    <span class="nav-badge">6</span>
+                    <span class="nav-badge" id="sidebarPrintersBadge">0</span>
                 </div>
                 <div class="nav-item" id="sidebarUsersTab" style="display: none;" onclick="switchTab('users')">
                     <span class="nav-icon">👥</span>
                     <span>Users</span>
-                    <span class="nav-badge">4</span>
+                    <span class="nav-badge" id="sidebarUsersBadge">0</span>
                 </div>
             </div>
 
@@ -3567,32 +3567,60 @@
 
         // ==================== END AUTHENTICATION ====================
 
-        // Update Cloudflare stats bar
-        function updateCloudflareStats() {
-            // Files count - count all uploaded files
-            const filesCount = document.querySelectorAll('#inquiriesTable tbody tr').length || 0;
-            document.getElementById('cfFilesCount').textContent = filesCount;
+        // Update Cloudflare stats bar and sidebar badges with REAL data
+        async function updateCloudflareStats() {
+            try {
+                const cloudflareUrl = getCloudflareUrl();
 
-            // Orders count - active + completed
-            const ordersCount = (document.querySelectorAll('#ordersTable tbody tr').length || 0) +
-                               (document.querySelectorAll('#completedOrdersTable tbody tr').length || 0);
-            document.getElementById('cfOrdersCount').textContent = ordersCount;
+                // Fetch all data in parallel
+                const [inquiriesRes, ordersRes, completedRes, ebayRes, printersRes, usersRes] = await Promise.all([
+                    authFetch(`${cloudflareUrl}/api/inquiries`),
+                    authFetch(`${cloudflareUrl}/api/orders`),
+                    authFetch(`${cloudflareUrl}/api/completed-orders`),
+                    authFetch(`${cloudflareUrl}/api/ebay-orders`),
+                    authFetch(`${cloudflareUrl}/api/printers`),
+                    authFetch(`${cloudflareUrl}/api/users`)
+                ]);
 
-            // Inquiries count
-            const inquiriesCount = document.querySelectorAll('#inquiriesTable tbody tr').length || 0;
-            document.getElementById('cfInquiriesCount').textContent = inquiriesCount;
+                // Parse responses
+                const inquiries = inquiriesRes.ok ? await inquiriesRes.json() : [];
+                const orders = ordersRes.ok ? await ordersRes.json() : [];
+                const completed = completedRes.ok ? await completedRes.json() : [];
+                const ebayOrders = ebayRes.ok ? await ebayRes.json() : [];
+                const printers = printersRes.ok ? await printersRes.json() : [];
+                const users = usersRes.ok ? await usersRes.json() : [];
 
-            // Estimate storage (rough calculation)
-            const storageMB = Math.round((filesCount * 0.5) + (inquiriesCount * 0.1));
-            const storagePercent = (storageMB / 10240) * 100; // Out of 10GB
-            document.getElementById('cfStorageUsed').textContent = `${storageMB} MB / 10 GB`;
-            document.getElementById('cfStorageProgress').style.width = `${Math.min(storagePercent, 100)}%`;
+                // Count files from inquiries (each inquiry might have a file)
+                const filesCount = inquiries.filter(i => i.fileName).length;
 
-            // Estimate database rows
-            const dbRows = filesCount + inquiriesCount + ordersCount;
-            const dbPercent = (dbRows / 100000) * 100;
-            document.getElementById('cfDbRows').textContent = `${dbRows.toLocaleString()} / 100K`;
-            document.getElementById('cfDbProgress').style.width = `${Math.min(dbPercent, 100)}%`;
+                // Update Cloudflare bar
+                document.getElementById('cfFilesCount').textContent = filesCount;
+                document.getElementById('cfOrdersCount').textContent = orders.length + completed.length;
+                document.getElementById('cfInquiriesCount').textContent = inquiries.length;
+
+                // Estimate storage (0.5MB per file on average)
+                const storageMB = Math.round(filesCount * 0.5);
+                const storagePercent = (storageMB / 10240) * 100; // Out of 10GB
+                document.getElementById('cfStorageUsed').textContent = `${storageMB} MB / 10 GB`;
+                document.getElementById('cfStorageProgress').style.width = `${Math.min(storagePercent, 100)}%`;
+
+                // Database rows
+                const dbRows = inquiries.length + orders.length + completed.length + ebayOrders.length + printers.length + users.length;
+                const dbPercent = (dbRows / 100000) * 100;
+                document.getElementById('cfDbRows').textContent = `${dbRows.toLocaleString()} / 100K`;
+                document.getElementById('cfDbProgress').style.width = `${Math.min(dbPercent, 100)}%`;
+
+                // Update sidebar badges
+                document.getElementById('sidebarInquiriesBadge').textContent = inquiries.length;
+                document.getElementById('sidebarOrdersBadge').textContent = orders.length;
+                document.getElementById('sidebarCompletedBadge').textContent = completed.length;
+                document.getElementById('sidebarEbayBadge').textContent = ebayOrders.length;
+                document.getElementById('sidebarPrintersBadge').textContent = printers.length;
+                document.getElementById('sidebarUsersBadge').textContent = users.length;
+
+            } catch (e) {
+                console.error('Error updating stats:', e);
+            }
         }
 
         // Basic tab switching - Make it global immediately
@@ -7889,8 +7917,8 @@ Generated by 3D Print Business Manager
                 // Update the Cloudflare usage bar with current stats
                 await updateCloudflareUsageBar();
 
-                // Update Cloudflare stats bar after data loads
-                setTimeout(updateCloudflareStats, 1000);
+                // Update Cloudflare stats bar and sidebar badges with real data
+                await updateCloudflareStats();
 
                 // Trigger initial material price and color update
                 updateMaterialPrice();
