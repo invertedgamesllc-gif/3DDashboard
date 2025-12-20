@@ -3603,21 +3603,31 @@
                 const filesCount = inquiries.filter(i => i.fileName || (i.files && i.files.length > 0)).length;
 
                 // Update Cloudflare bar
-                document.getElementById('cfFilesCount').textContent = filesCount;
-                document.getElementById('cfOrdersCount').textContent = allOrders.length;
-                document.getElementById('cfInquiriesCount').textContent = inquiries.length;
+                const cfFilesEl = document.getElementById('cfFilesCount');
+                const cfOrdersEl = document.getElementById('cfOrdersCount');
+                const cfInquiriesEl = document.getElementById('cfInquiriesCount');
+                const cfStorageEl = document.getElementById('cfStorageUsed');
+                const cfStorageProgressEl = document.getElementById('cfStorageProgress');
+                const cfDbRowsEl = document.getElementById('cfDbRows');
+                const cfDbProgressEl = document.getElementById('cfDbProgress');
+
+                console.log('Elements found:', { cfFilesEl, cfOrdersEl, cfInquiriesEl });
+
+                if (cfFilesEl) cfFilesEl.textContent = filesCount;
+                if (cfOrdersEl) cfOrdersEl.textContent = allOrders.length;
+                if (cfInquiriesEl) cfInquiriesEl.textContent = inquiries.length;
 
                 // Estimate storage (0.5MB per file on average)
                 const storageMB = Math.round(filesCount * 0.5);
                 const storagePercent = (storageMB / 10240) * 100; // Out of 10GB
-                document.getElementById('cfStorageUsed').textContent = `${storageMB} MB / 10 GB`;
-                document.getElementById('cfStorageProgress').style.width = `${Math.min(storagePercent, 100)}%`;
+                if (cfStorageEl) cfStorageEl.textContent = `${storageMB} MB / 10 GB`;
+                if (cfStorageProgressEl) cfStorageProgressEl.style.width = `${Math.min(storagePercent, 100)}%`;
 
                 // Database rows
                 const dbRows = inquiries.length + allOrders.length + ebayOrders.length + printers.length + users.length;
                 const dbPercent = (dbRows / 100000) * 100;
-                document.getElementById('cfDbRows').textContent = `${dbRows.toLocaleString()} / 100K`;
-                document.getElementById('cfDbProgress').style.width = `${Math.min(dbPercent, 100)}%`;
+                if (cfDbRowsEl) cfDbRowsEl.textContent = `${dbRows.toLocaleString()} / 100K`;
+                if (cfDbProgressEl) cfDbProgressEl.style.width = `${Math.min(dbPercent, 100)}%`;
 
                 // Update sidebar badges
                 document.getElementById('sidebarInquiriesBadge').textContent = inquiries.length;
@@ -3627,10 +3637,18 @@
                 document.getElementById('sidebarPrintersBadge').textContent = printers.length;
                 document.getElementById('sidebarUsersBadge').textContent = users.length;
 
-                console.log('📊 Stats updated:', { inquiries: inquiries.length, orders: allOrders.length, files: filesCount, ebay: ebayOrders.length });
+                console.log('📊 Stats updated:', {
+                    inquiries: inquiries.length,
+                    orders: allOrders.length,
+                    files: filesCount,
+                    ebay: ebayOrders.length,
+                    storage: storageMB + ' MB',
+                    dbRows: dbRows
+                });
 
             } catch (e) {
-                console.error('Error updating stats:', e);
+                console.error('❌ Error updating stats:', e);
+                console.error('Stack trace:', e.stack);
             }
         }
 
