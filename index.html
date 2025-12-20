@@ -359,96 +359,11 @@
         
 
         /* Cloudflare Usage Bar */
-        .cloudflare-usage-bar {
-            background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%);
-            border-bottom: 1px solid var(--border-primary);
-            padding: 12px 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            font-size: 13px;
-        }
+        /* Removed old cloudflare-usage-bar styles - using new cloudflare-bar */
 
-        .cf-usage-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #f97316;
-        }
+        /* Removed all old cloudflare-usage-bar CSS - using new cloudflare-bar styles */
 
-        .cf-usage-stats {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
 
-        .cf-usage-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .cf-usage-label {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .cf-usage-value {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .cf-usage-bar-wrapper {
-            flex: 1;
-            max-width: 200px;
-        }
-
-        .cf-usage-progress {
-            height: 6px;
-            background: var(--bg-elevated);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 4px;
-        }
-
-        .cf-usage-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-
-        .cf-status-badge {
-            padding: 4px 12px;
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .cf-delete-all-btn {
-            padding: 6px 16px;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-left: auto;
-        }
-
-        .cf-delete-all-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-        }
-
-        
 
         .nav-tab {
             padding: 1rem 1.5rem;
@@ -961,96 +876,11 @@
         }
 
         /* Cloudflare Usage Bar */
-        .cloudflare-usage-bar {
-            background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%);
-            border-bottom: 1px solid var(--border-primary);
-            padding: 12px 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            font-size: 13px;
-        }
+        /* Removed old cloudflare-usage-bar styles - using new cloudflare-bar */
 
-        .cf-usage-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #f97316;
-        }
+        /* Removed all old cloudflare-usage-bar CSS - using new cloudflare-bar styles */
 
-        .cf-usage-stats {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .cf-usage-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .cf-usage-label {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .cf-usage-value {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .cf-usage-bar-wrapper {
-            flex: 1;
-            max-width: 200px;
-        }
-
-        .cf-usage-progress {
-            height: 6px;
-            background: var(--bg-elevated);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 4px;
-        }
-
-        .cf-usage-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-
-        .cf-status-badge {
-            padding: 4px 12px;
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .cf-delete-all-btn {
-            padding: 6px 16px;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-left: auto;
-        }
-
-        .cf-delete-all-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-        }
-
-        .nav-tabs {
+.nav-tabs {
             background: var(--bg-secondary);
             padding: 0 2rem;
             border-bottom: 1px solid var(--border-primary);
@@ -1413,41 +1243,6 @@
 </head>
 <body>
     <!-- Cloudflare Usage Bar -->
-    <div class="cloudflare-usage-bar" id="cloudflareUsageBar">
-        <div class="cf-usage-title">
-            ☁️ Cloudflare
-        </div>
-        <div class="cf-usage-stats">
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Storage:</span>
-                <div class="cf-usage-bar-wrapper">
-                    <div class="cf-usage-value" id="cfStorageText">0 MB / 10 GB</div>
-                    <div class="cf-usage-progress">
-                        <div class="cf-usage-progress-fill" id="cfStorageBar" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Files:</span>
-                <span class="cf-usage-value" id="cfFilesCount">0</span>
-            </div>
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Inquiries:</span>
-                <span class="cf-usage-value" id="cfInquiriesCount">0</span>
-            </div>
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Orders:</span>
-                <span class="cf-usage-value" id="cfOrdersCount">0</span>
-            </div>
-        </div>
-        <div class="cf-status-badge" id="cfStatusBadge">
-            Connected
-        </div>
-        <button class="cf-delete-all-btn" onclick="deleteAllCloudflareData()">
-            🗑️ Delete All Data
-        </button>
-    </div>
-
     <!-- Login Overlay -->
     <!DOCTYPE html>
 <html lang="en">
@@ -1481,96 +1276,11 @@
         }
 
         /* Cloudflare Usage Bar */
-        .cloudflare-usage-bar {
-            background: linear-gradient(135deg, #1a1a1a 0%, #262626 100%);
-            border-bottom: 1px solid var(--border-primary);
-            padding: 12px 2rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            font-size: 13px;
-        }
+        /* Removed old cloudflare-usage-bar styles - using new cloudflare-bar */
 
-        .cf-usage-title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #f97316;
-        }
+        /* Removed all old cloudflare-usage-bar CSS - using new cloudflare-bar styles */
 
-        .cf-usage-stats {
-            display: flex;
-            gap: 2rem;
-            flex: 1;
-        }
-
-        .cf-usage-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .cf-usage-label {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .cf-usage-value {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .cf-usage-bar-wrapper {
-            flex: 1;
-            max-width: 200px;
-        }
-
-        .cf-usage-progress {
-            height: 6px;
-            background: var(--bg-elevated);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 4px;
-        }
-
-        .cf-usage-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-
-        .cf-status-badge {
-            padding: 4px 12px;
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .cf-delete-all-btn {
-            padding: 6px 16px;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-left: auto;
-        }
-
-        .cf-delete-all-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: rgba(239, 68, 68, 0.5);
-        }
-
-        .nav-tabs {
+.nav-tabs {
             background: var(--bg-secondary);
             padding: 0 2rem;
             border-bottom: 1px solid var(--border-primary);
@@ -1933,41 +1643,6 @@
 </head>
 <body>
     <!-- Cloudflare Usage Bar -->
-    <div class="cloudflare-usage-bar" id="cloudflareUsageBar">
-        <div class="cf-usage-title">
-            ☁️ Cloudflare
-        </div>
-        <div class="cf-usage-stats">
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Storage:</span>
-                <div class="cf-usage-bar-wrapper">
-                    <div class="cf-usage-value" id="cfStorageText">0 MB / 10 GB</div>
-                    <div class="cf-usage-progress">
-                        <div class="cf-usage-progress-fill" id="cfStorageBar" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Files:</span>
-                <span class="cf-usage-value" id="cfFilesCount">0</span>
-            </div>
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Inquiries:</span>
-                <span class="cf-usage-value" id="cfInquiriesCount">0</span>
-            </div>
-            <div class="cf-usage-item">
-                <span class="cf-usage-label">Orders:</span>
-                <span class="cf-usage-value" id="cfOrdersCount">0</span>
-            </div>
-        </div>
-        <div class="cf-status-badge" id="cfStatusBadge">
-            Connected
-        </div>
-        <button class="cf-delete-all-btn" onclick="deleteAllCloudflareData()">
-            🗑️ Delete All Data
-        </button>
-    </div>
-
     <!-- Login Overlay -->
     <div id="loginOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-primary); z-index: 10000; display: flex; align-items: center; justify-content: center;">
         <div style="background: var(--bg-card); border: 1px solid var(--border-primary); border-radius: 16px; padding: 3rem; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
