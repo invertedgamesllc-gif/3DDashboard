@@ -2067,6 +2067,9 @@ async function fetchEbayOrders(env) {
     try {
         const config = getEbayConfig(env);
 
+        console.log('Fetching eBay orders from:', config.apiUrl);
+        console.log('Using marketplace: EBAY_US');
+
         // eBay API call using REST API
         const response = await fetch(`${config.apiUrl}/sell/fulfillment/v1/order`, {
             method: 'GET',
@@ -2077,11 +2080,16 @@ async function fetchEbayOrders(env) {
             }
         });
 
+        console.log('eBay API response status:', response.status);
+
         if (!response.ok) {
-            throw new Error(`eBay API error: ${response.status} ${response.statusText}`);
+            const errorText = await response.text();
+            console.error('eBay API error response:', errorText);
+            throw new Error(`eBay API error: ${response.status} ${response.statusText} - ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('eBay API returned', data.orders?.length || 0, 'orders');
 
         // Transform eBay API response to our format
         const orders = (data.orders || []).map(order => {
@@ -2119,8 +2127,9 @@ async function fetchEbayOrders(env) {
 
         return orders;
     } catch (error) {
-        console.error('Error fetching eBay orders:', error);
-        // Return empty array on error to prevent sync failures
-        return [];
+        console.error('Error fetching eBay orders:', error.message);
+        console.error('Full error:', error);
+        // Throw error so it's visible in the sync response
+        throw error;
     }
 }
