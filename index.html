@@ -2329,10 +2329,20 @@
                 </div>
             </div>
 
-            <!-- Orders Table -->
-            <div class="card" style="padding: 0; overflow: hidden;">
+            <!-- Order Tabs -->
+            <div style="display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-secondary);">
+                <button id="activeOrdersTab" onclick="switchEbayTab('active')" style="padding: 12px 24px; font-size: 14px; font-weight: 600; background: transparent; border: none; border-bottom: 2px solid #22c55e; margin-bottom: -2px; color: #22c55e; cursor: pointer; transition: all 0.2s;">
+                    📦 Active Orders <span id="activeOrdersCount" style="background: rgba(34, 197, 94, 0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 6px;">0</span>
+                </button>
+                <button id="completedOrdersTab" onclick="switchEbayTab('completed')" style="padding: 12px 24px; font-size: 14px; font-weight: 600; background: transparent; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--text-muted); cursor: pointer; transition: all 0.2s;">
+                    ✅ Completed Orders <span id="completedOrdersCount" style="background: rgba(100, 100, 100, 0.2); padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 6px;">0</span>
+                </button>
+            </div>
+
+            <!-- Active Orders Table -->
+            <div id="activeOrdersSection" class="card" style="padding: 0; overflow: hidden;">
                 <div style="padding: 16px; border-bottom: 1px solid var(--border-secondary); background: rgba(255, 255, 255, 0.02);">
-                    <h3 style="font-size: 16px; font-weight: 600; margin: 0; color: var(--text-primary);">📋 Order List</h3>
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0; color: var(--text-primary);">📋 Active Orders</h3>
                 </div>
                 <div style="overflow-x: auto;">
                     <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
@@ -2358,8 +2368,41 @@
                 <!-- Empty State -->
                 <div id="emptyEbayOrdersState" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
                     <div style="font-size: 48px; margin-bottom: 1rem; opacity: 0.5;">📭</div>
-                    <h3 style="font-size: 18px; margin-bottom: 0.5rem; color: var(--text-secondary);">No eBay Orders</h3>
-                    <p style="font-size: 14px;">Click "Sync from eBay" to fetch your latest orders.</p>
+                    <h3 style="font-size: 18px; margin-bottom: 0.5rem; color: var(--text-secondary);">No Active Orders</h3>
+                    <p style="font-size: 14px;">All caught up! No pending orders to fulfill.</p>
+                </div>
+            </div>
+
+            <!-- Completed Orders Table -->
+            <div id="completedOrdersSection" class="card" style="padding: 0; overflow: hidden; display: none;">
+                <div style="padding: 16px; border-bottom: 1px solid var(--border-secondary); background: rgba(255, 255, 255, 0.02);">
+                    <h3 style="font-size: 16px; font-weight: 600; margin: 0; color: var(--text-primary);">✅ Completed Orders</h3>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead style="background: rgba(255, 255, 255, 0.05);">
+                            <tr>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Order ID</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Buyer</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Item</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Ship To</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Shipped Date</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Total</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Tracking</th>
+                                <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-secondary); border-bottom: 1px solid var(--border-secondary);">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="completedOrdersTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyCompletedOrdersState" style="display: none; text-align: center; padding: 4rem 2rem; color: var(--text-muted);">
+                    <div style="font-size: 48px; margin-bottom: 1rem; opacity: 0.5;">📦</div>
+                    <h3 style="font-size: 18px; margin-bottom: 0.5rem; color: var(--text-secondary);">No Completed Orders</h3>
+                    <p style="font-size: 14px;">Shipped orders will appear here.</p>
                 </div>
             </div>
         </div>
@@ -3080,6 +3123,17 @@
                     <button type="button" class="btn btn-secondary" onclick="closeAddPrinterModal()" style="flex: 1;">❌ Cancel</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- View Order Details Modal -->
+    <div id="viewOrderModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; backdrop-filter: blur(4px);">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-card); border: 1px solid var(--border-primary); border-radius: 12px; padding: 2rem; width: 90%; max-width: 700px; max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 id="viewOrderTitle" style="font-size: 20px; font-weight: 700; margin: 0; color: var(--text-primary);">Order Details</h2>
+                <button onclick="document.getElementById('viewOrderModal').style.display='none'" style="background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='none'">×</button>
+            </div>
+            <div id="viewOrderContent" style="color: var(--text-secondary);"></div>
         </div>
     </div>
 
@@ -5482,62 +5536,144 @@ Generated by 3D Print Business Manager
             }
         };
 
-        function displayEbayOrders(orders) {
-            const tableBody = document.getElementById('ebayOrdersTableBody');
-            const emptyState = document.getElementById('emptyEbayOrdersState');
+        // Track current eBay tab
+        let currentEbayTab = 'active';
 
-            if (orders.length === 0) {
-                tableBody.innerHTML = '';
-                emptyState.style.display = 'block';
-                return;
+        window.switchEbayTab = function(tab) {
+            currentEbayTab = tab;
+            const activeTab = document.getElementById('activeOrdersTab');
+            const completedTab = document.getElementById('completedOrdersTab');
+            const activeSection = document.getElementById('activeOrdersSection');
+            const completedSection = document.getElementById('completedOrdersSection');
+
+            if (tab === 'active') {
+                activeTab.style.borderBottomColor = '#22c55e';
+                activeTab.style.color = '#22c55e';
+                completedTab.style.borderBottomColor = 'transparent';
+                completedTab.style.color = 'var(--text-muted)';
+                activeSection.style.display = 'block';
+                completedSection.style.display = 'none';
+            } else {
+                activeTab.style.borderBottomColor = 'transparent';
+                activeTab.style.color = 'var(--text-muted)';
+                completedTab.style.borderBottomColor = '#22c55e';
+                completedTab.style.color = '#22c55e';
+                activeSection.style.display = 'none';
+                completedSection.style.display = 'block';
+            }
+        };
+
+        function displayEbayOrders(orders) {
+            // Separate active vs completed orders
+            const activeOrders = orders.filter(o => o.order_status !== 'shipped' && o.order_status !== 'FULFILLED');
+            const completedOrders = orders.filter(o => o.order_status === 'shipped' || o.order_status === 'FULFILLED');
+
+            // Update tab counts
+            document.getElementById('activeOrdersCount').textContent = activeOrders.length;
+            document.getElementById('completedOrdersCount').textContent = completedOrders.length;
+
+            // Display active orders
+            const activeTableBody = document.getElementById('ebayOrdersTableBody');
+            const activeEmptyState = document.getElementById('emptyEbayOrdersState');
+
+            if (activeOrders.length === 0) {
+                activeTableBody.innerHTML = '';
+                activeEmptyState.style.display = 'block';
+            } else {
+                activeEmptyState.style.display = 'none';
+                activeTableBody.innerHTML = activeOrders.map(order => {
+                    const shipByDate = order.ship_by_date ? new Date(order.ship_by_date) : null;
+                    const isUrgent = shipByDate && (shipByDate - new Date()) < 24 * 60 * 60 * 1000;
+                    const shipByFormatted = shipByDate ? shipByDate.toLocaleDateString() : '-';
+                    const statusBadge = getEbayStatusBadge(order.order_status);
+                    const shippingAddress = `${order.ship_to_city || ''}, ${order.ship_to_state || ''} ${order.ship_to_zip || ''}`;
+
+                    return `
+                        <tr style="border-bottom: 1px solid var(--border-secondary); ${isUrgent ? 'background: rgba(239, 68, 68, 0.05);' : ''}">
+                            <td style="padding: 12px; color: var(--text-primary); font-weight: 600; font-size: 12px;">${order.order_id || '#' + order.id.slice(-6)}</td>
+                            <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">${order.buyer_username || 'N/A'}</div>
+                                <div style="font-size: 11px;">${order.buyer_email || ''}</div>
+                            </td>
+                            <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">${order.item_title || 'Unknown Item'}</div>
+                                ${order.item_sku ? `<div style="font-size: 10px; color: var(--text-muted);">SKU: ${order.item_sku}</div>` : ''}
+                                ${order.quantity > 1 ? `<div style="font-size: 10px; color: var(--text-muted);">Qty: ${order.quantity}</div>` : ''}
+                            </td>
+                            <td style="padding: 12px; color: var(--text-secondary); font-size: 11px;">
+                                <div style="font-weight: 500; color: var(--text-primary);">${order.ship_to_name || ''}</div>
+                                <div>${shippingAddress}</div>
+                                ${order.ship_to_country !== 'US' ? `<div style="color: #f59e0b;">🌍 ${order.ship_to_country}</div>` : ''}
+                            </td>
+                            <td style="padding: 12px; color: ${isUrgent ? '#ef4444' : 'var(--text-secondary)'}; font-size: 12px; font-weight: ${isUrgent ? '700' : '400'};">
+                                ${isUrgent ? '⚠️ ' : ''}${shipByFormatted}
+                            </td>
+                            <td style="padding: 12px; color: #22c55e; font-weight: 700; font-size: 13px;">$${(order.total_price || 0).toFixed(2)}</td>
+                            <td style="padding: 12px; font-size: 11px;">
+                                ${order.tracking_number ?
+                                    `<div style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 10px;">${order.tracking_number}</div>` :
+                                    `<button onclick="addEbayTracking('${order.id}')" class="btn-secondary" style="padding: 4px 8px; font-size: 11px;">+ Add Tracking</button>`
+                                }
+                            </td>
+                            <td style="padding: 12px;">${statusBadge}</td>
+                            <td style="padding: 12px;">
+                                <div style="display: flex; gap: 4px;">
+                                    <button onclick="viewEbayOrder('${order.id}')" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">View</button>
+                                    <button onclick="markEbayShipped('${order.id}')" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Ship</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
             }
 
-            emptyState.style.display = 'none';
+            // Display completed orders
+            const completedTableBody = document.getElementById('completedOrdersTableBody');
+            const completedEmptyState = document.getElementById('emptyCompletedOrdersState');
 
-            tableBody.innerHTML = orders.map(order => {
-                const shipByDate = order.ship_by_date ? new Date(order.ship_by_date) : null;
-                const isUrgent = shipByDate && (shipByDate - new Date()) < 24 * 60 * 60 * 1000;
-                const shipByFormatted = shipByDate ? shipByDate.toLocaleDateString() : '-';
-                const statusBadge = getEbayStatusBadge(order.order_status);
-                const shippingAddress = `${order.ship_to_city}, ${order.ship_to_state} ${order.ship_to_zip}`;
+            if (completedOrders.length === 0) {
+                completedTableBody.innerHTML = '';
+                completedEmptyState.style.display = 'block';
+            } else {
+                completedEmptyState.style.display = 'none';
+                completedTableBody.innerHTML = completedOrders.map(order => {
+                    const shippedDate = order.shipped_time ? new Date(order.shipped_time) : null;
+                    const shippedFormatted = shippedDate ? shippedDate.toLocaleDateString() : '-';
+                    const statusBadge = getEbayStatusBadge(order.order_status);
+                    const shippingAddress = `${order.ship_to_city || ''}, ${order.ship_to_state || ''} ${order.ship_to_zip || ''}`;
 
-                return `
-                    <tr style="border-bottom: 1px solid var(--border-secondary); ${isUrgent ? 'background: rgba(239, 68, 68, 0.05);' : ''}">
-                        <td style="padding: 12px; color: var(--text-primary); font-weight: 600; font-size: 12px;">${order.order_id || '#' + order.id.slice(-6)}</td>
-                        <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                            <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">${order.buyer_username || 'N/A'}</div>
-                            <div style="font-size: 11px;">${order.buyer_email || ''}</div>
-                        </td>
-                        <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
-                            <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">${order.item_title || 'Unknown Item'}</div>
-                            ${order.item_sku ? `<div style="font-size: 10px; color: var(--text-muted);">SKU: ${order.item_sku}</div>` : ''}
-                            ${order.quantity > 1 ? `<div style="font-size: 10px; color: var(--text-muted);">Qty: ${order.quantity}</div>` : ''}
-                        </td>
-                        <td style="padding: 12px; color: var(--text-secondary); font-size: 11px;">
-                            <div style="font-weight: 500; color: var(--text-primary);">${order.ship_to_name || ''}</div>
-                            <div>${shippingAddress}</div>
-                            ${order.ship_to_country !== 'US' ? `<div style="color: #f59e0b;">🌍 ${order.ship_to_country}</div>` : ''}
-                        </td>
-                        <td style="padding: 12px; color: ${isUrgent ? '#ef4444' : 'var(--text-secondary)'}; font-size: 12px; font-weight: ${isUrgent ? '700' : '400'};">
-                            ${isUrgent ? '⚠️ ' : ''}${shipByFormatted}
-                        </td>
-                        <td style="padding: 12px; color: #22c55e; font-weight: 700; font-size: 13px;">$${(order.total_price || 0).toFixed(2)}</td>
-                        <td style="padding: 12px; font-size: 11px;">
-                            ${order.tracking_number ?
-                                `<div style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 10px;">${order.tracking_number}</div>` :
-                                `<button onclick="addEbayTracking('${order.id}')" class="btn-secondary" style="padding: 4px 8px; font-size: 11px;">+ Add Tracking</button>`
-                            }
-                        </td>
-                        <td style="padding: 12px;">${statusBadge}</td>
-                        <td style="padding: 12px;">
-                            <div style="display: flex; gap: 4px;">
-                                <button onclick="viewEbayOrder('${order.id}')" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">View</button>
-                                <button onclick="markEbayShipped('${order.id}')" style="background: rgba(34, 197, 94, 0.1); color: #22c55e; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 11px;">Ship</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+                    return `
+                        <tr style="border-bottom: 1px solid var(--border-secondary);">
+                            <td style="padding: 12px; color: var(--text-primary); font-weight: 600; font-size: 12px;">${order.order_id || '#' + order.id.slice(-6)}</td>
+                            <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 2px;">${order.buyer_username || 'N/A'}</div>
+                                <div style="font-size: 11px;">${order.buyer_email || ''}</div>
+                            </td>
+                            <td style="padding: 12px; color: var(--text-secondary); font-size: 12px;">
+                                <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 2px;">${order.item_title || 'Unknown Item'}</div>
+                                ${order.item_sku ? `<div style="font-size: 10px; color: var(--text-muted);">SKU: ${order.item_sku}</div>` : ''}
+                                ${order.quantity > 1 ? `<div style="font-size: 10px; color: var(--text-muted);">Qty: ${order.quantity}</div>` : ''}
+                            </td>
+                            <td style="padding: 12px; color: var(--text-secondary); font-size: 11px;">
+                                <div style="font-weight: 500; color: var(--text-primary);">${order.ship_to_name || ''}</div>
+                                <div>${shippingAddress}</div>
+                                ${order.ship_to_country !== 'US' ? `<div style="color: #f59e0b;">🌍 ${order.ship_to_country}</div>` : ''}
+                            </td>
+                            <td style="padding: 12px; color: #22c55e; font-size: 12px;">
+                                ${shippedFormatted}
+                            </td>
+                            <td style="padding: 12px; color: #22c55e; font-weight: 700; font-size: 13px;">$${(order.total_price || 0).toFixed(2)}</td>
+                            <td style="padding: 12px; font-size: 11px;">
+                                ${order.tracking_number ?
+                                    `<div style="background: rgba(34, 197, 94, 0.1); color: #22c55e; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 10px;">${order.tracking_number}</div>` :
+                                    `<span style="color: var(--text-muted);">-</span>`
+                                }
+                            </td>
+                            <td style="padding: 12px;">${statusBadge}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
         }
 
         function updateEbayStats(orders) {
@@ -6438,7 +6574,7 @@ Generated by 3D Print Business Manager
                     order.status === 'completed' || order.status === 'shipped'
                 );
 
-                // Convert to display format
+                // Convert to display format (preserve full data for detail view)
                 const displayOrders = completedOrders.map(order => ({
                     id: order.id,
                     customerName: order.customer_name,
@@ -6447,9 +6583,21 @@ Generated by 3D Print Business Manager
                     value: order.total_amount || 0,
                     status: order.status,
                     completedDate: order.updated_at || order.order_date,
+                    orderDate: order.order_date,
                     printTime: order.print_time || 0,
-                    items: order.items || []
+                    items: order.items || [],
+                    files: order.files || [],
+                    printerName: order.printer_name || '',
+                    inquiryId: order.inquiry_id || '',
+                    notes: order.notes || '',
+                    material: order.material || '',
+                    quantity: order.quantity || 1,
+                    createdByName: order.created_by_name || '',
+                    convertedByName: order.converted_by_name || ''
                 }));
+
+                // Store for detail view lookup
+                window._completedOrdersData = displayOrders;
 
                 displayCompletedOrders(displayOrders);
                 updateFinancialSummary(displayOrders);
@@ -6593,8 +6741,109 @@ Generated by 3D Print Business Manager
 
         // View order details
         window.viewOrderDetails = function(orderId) {
-            showNotification(`Opening order #${orderId.slice(-4)} details...`, 'info');
-            // TODO: Implement order details modal
+            const orders = window._completedOrdersData || [];
+            const order = orders.find(o => o.id === orderId);
+            if (!order) {
+                showNotification('Order not found', 'error');
+                return;
+            }
+
+            const cloudflareUrl = getCloudflareUrl();
+            const completedDate = order.completedDate ? new Date(order.completedDate).toLocaleDateString() : 'N/A';
+            const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString() : 'N/A';
+
+            const statusLabel = order.status === 'completed' ? '✅ Completed' : '📦 Shipped';
+
+            // Build files section
+            let filesHtml = '';
+            if (order.files && order.files.length > 0) {
+                filesHtml = `
+                    <div style="margin-top: 1.5rem;">
+                        <h3 style="color: var(--text-primary); font-size: 16px; font-weight: 600; margin-bottom: 0.75rem;">📁 Files (${order.files.length})</h3>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            ${order.files.map(file => {
+                                const fileSize = file.file_size ? (file.file_size / 1024 / 1024).toFixed(2) + ' MB' : 'Unknown size';
+                                const downloadUrl = cloudflareUrl + '/api/download/' + encodeURIComponent(file.file_key);
+                                return `
+                                    <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; padding: 10px 14px;">
+                                        <div style="display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1;">
+                                            <span style="font-size: 18px;">📄</span>
+                                            <div style="min-width: 0;">
+                                                <div style="color: var(--text-primary); font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${file.original_name || file.file_key}</div>
+                                                <div style="color: var(--text-muted); font-size: 11px;">${fileSize} · ${file.file_type || 'Unknown type'}</div>
+                                            </div>
+                                        </div>
+                                        <a href="${downloadUrl}" target="_blank" download="${file.original_name || file.file_key}" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; text-decoration: none; white-space: nowrap; font-weight: 500;">⬇️ Download</a>
+                                    </div>`;
+                            }).join('')}
+                        </div>
+                    </div>`;
+            } else {
+                filesHtml = `
+                    <div style="margin-top: 1.5rem;">
+                        <h3 style="color: var(--text-primary); font-size: 16px; font-weight: 600; margin-bottom: 0.75rem;">📁 Files</h3>
+                        <div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 8px;">No files attached to this order</div>
+                    </div>`;
+            }
+
+            const content = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px;">
+                        <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Customer</div>
+                        <div style="color: var(--text-primary); font-size: 14px; font-weight: 600;">${order.customerName}</div>
+                        <div style="color: var(--text-muted); font-size: 12px; margin-top: 2px;">${order.customerEmail || 'No email'}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px;">
+                        <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Status</div>
+                        <div style="font-size: 14px; font-weight: 600;">${statusLabel}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px;">
+                        <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Order Date</div>
+                        <div style="color: var(--text-primary); font-size: 14px;">${orderDate}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px;">
+                        <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Completed Date</div>
+                        <div style="color: var(--text-primary); font-size: 14px;">${completedDate}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px;">
+                        <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Total Amount</div>
+                        <div style="color: #22c55e; font-size: 18px; font-weight: 700;">$${order.value.toFixed(2)}</div>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px;">
+                        <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Print Time</div>
+                        <div style="color: var(--text-primary); font-size: 14px;">${order.printTime || 0} hours</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px; margin-bottom: 1rem;">
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Product</div>
+                    <div style="color: var(--text-primary); font-size: 14px;">${order.product}</div>
+                </div>
+
+                ${order.printerName ? `
+                <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px; margin-bottom: 1rem;">
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Printer</div>
+                    <div style="color: var(--text-primary); font-size: 14px;">🖨️ ${order.printerName}</div>
+                </div>` : ''}
+
+                ${order.material ? `
+                <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px; margin-bottom: 1rem;">
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Material</div>
+                    <div style="color: var(--text-primary); font-size: 14px;">${order.material}</div>
+                </div>` : ''}
+
+                ${order.notes ? `
+                <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 14px; margin-bottom: 1rem;">
+                    <div style="color: var(--text-muted); font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Notes</div>
+                    <div style="color: var(--text-primary); font-size: 13px; white-space: pre-wrap;">${order.notes}</div>
+                </div>` : ''}
+
+                ${filesHtml}
+            `;
+
+            document.getElementById('viewOrderTitle').textContent = `Order #${orderId.toString().slice(-4)} Details`;
+            document.getElementById('viewOrderContent').innerHTML = content;
+            document.getElementById('viewOrderModal').style.display = 'block';
         };
 
         // ===== INVENTORY MANAGEMENT SYSTEM =====
